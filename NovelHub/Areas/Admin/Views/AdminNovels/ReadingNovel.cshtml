@@ -1,0 +1,647 @@
+﻿
+@{
+    ViewBag.Title = "Đọc Truyện";
+    Layout = "~/Views/Shared/Layout.cshtml";
+    var currentUser = (NovelHub.Models.User)HttpContext.Current.Session["User"];
+    var userid = -1;
+    if (currentUser != null)
+    {
+        userid = currentUser.UserID;
+    }
+}
+
+<span id="DataForViewNovel" class="d-none" data-userid="@userid"></span>
+
+@section css {
+    <style>
+        :root {
+            --primaty-color: #00dc82;
+            --text-bg: #fff;
+            --text-color: #000;
+        }
+
+        a {
+            color: #000;
+        }
+
+        body {
+            background-image: linear-gradient( #00dc8035 10%, #fff);
+        }
+
+        .btnHovered:hover {
+            background-color: var(--primaty-color);
+            color: #fff !important;
+            border-color: var(--primaty-color) !important;
+            transition: background-color ease 1s, border-color ease .5s;
+        }
+
+        .textHovered:hover {
+            color: var(--primaty-color);
+        }
+
+        .cursorPointer {
+            cursor: pointer;
+        }
+
+        .bgBrimaryKey {
+            background-color: var(--primaty-color);
+        }
+
+        #Header {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: -100%;
+            transition: all ease-out .3s;
+            z-index: 999;
+        }
+
+        #Main .ActionChapter .ChapterList {
+            opacity: 0;
+            transition: opacity ease .3s;
+            width: 100%;
+            max-height: 60vh;
+            overflow: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+        }
+
+            #Main .ActionChapter .ChapterList a {
+                padding: 4px 0;
+                display: block;
+            }
+
+                #Main .ActionChapter .ChapterList a.active,
+                #Main .ActionChapter .ChapterList a:hover {
+                    color: var(--primaty-color);
+                }
+
+        #Main .ChapterContent {
+            border-radius: 8px;
+        }
+
+            #Main .ChapterContent,
+            #Main .ChapterContent p {
+                text-align: justify; /* Căn đều 2 bên */
+                hyphens: auto; /* Phân chia từng dòng */
+                white-space: pre-line; /* Khi gặp dấu chấm, văn bản sẽ xuống dòng */
+                margin: 0;
+                line-height: 200%;
+            }
+
+        #Tab-Action .Item-Link:hover {
+            background-color: #00dc82;
+            color: #fff;
+        }
+    </style>
+}
+
+<section id="Navigation">
+    <input type="checkbox" hidden id="Bar">
+    <label for="Bar" class="cursorPointer fixed-top p-3" style="width: 50px;"><i class="fa-solid fa-bars-progress">HOME</i></label>
+</section>
+
+<script>
+    // js header
+    var chkBar = document.querySelector('#Navigation #Bar');
+    var labelChekBar = document.querySelector('#Navigation label');
+    var header = document.querySelector('#Header');
+    chkBar.addEventListener('change', function () {
+        if (this.checked) {
+            header.classList.add('bg-white')
+            header.style.top = '0';
+        } else {
+            header.style.top = '-100%';
+        }
+    })
+
+    document.addEventListener('click', function (event) {
+        if (!header.contains(event.target) && !chkBar.contains(event.target) && !labelChekBar.contains(event.target)) {
+            header.style.top = '-100%';
+            chkBar.checked = false;
+        }
+    });
+
+    var Links = document.querySelectorAll('#Header a');
+    Links.forEach(link => {
+        link.addEventListener('click', function () {
+            chkBar.checked = false;
+        });
+    });
+
+</script>
+
+<section id="Main" class="my-5">
+    <div class="container">
+        <div class="row text-center">
+            <h3><a href="~/Novel/ViewNovel/@ViewBag.Chapter.Novel.NovelID">@ViewBag.Chapter.Novel.Title</a></h3>
+            <a href="~/User/ViewUserProfile/@ViewBag.Chapter.Novel.User.UserID" class="mb-3">Người đăng: @ViewBag.Chapter.Novel.User.Username</a>
+        </div>
+        <div class="row align-items-center g-3 ActionChapter pb-5">
+
+            <div class="col-12 col-8 rounded-pill position-relative">
+                <div>
+                    <input type="checkbox" hidden id="CheckChapterList">
+                    <label for="CheckChapterList" class="w-100 cursorPointer" id="labelCheckChapterList">
+                        <h4 class="mb-0 py-2 mb-2 text-center">@ViewBag.Chapter.ChapterTitle <i class="fa-solid fa-angles-down"></i></h4>
+                    </label>
+                </div>
+                <div class="ChapterList container-fluid bg-white rounded-top rounded-bottom position-absolute shadow" style="top: 100%;">
+                    <div class="row d-none p-3">
+                        <!-- Chapter list -->
+                        @foreach (var item in ViewBag.Chapters)
+                        {
+                            if (item.ChapterID == ViewBag.Chapter.ChapterID)
+                            {
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <a href="/Admin/AdminNovels/ReadingNovel/@item.ChapterID" class="active">@item.ChapterTitle</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <a href="/Admin/AdminNovels/ReadingNovel/@item.ChapterID">@item.ChapterTitle</a>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <script>
+                    // js chap list
+                    var boxChapList = document.querySelector('#Main .ActionChapter .ChapterList');
+                    var chapterList = document.querySelector('#Main .ActionChapter .ChapterList .row');
+                    var checkChapterList = document.getElementById('CheckChapterList');
+                    var labelCheckChapterList = document.getElementById('labelCheckChapterList');
+
+                    checkChapterList.addEventListener('change', function () {
+                        if (this.checked) {
+                            boxChapList.classList.add('opacity-100');
+                            chapterList.classList.remove('d-none');
+                        } else {
+                            boxChapList.classList.remove('opacity-100');
+                            chapterList.classList.add('d-none');
+                        }
+                    });
+
+                    // Ẩn drop-down menu khi nhấp vào bất kỳ nơi nào khác trên trang
+                    document.addEventListener('click', function (event) {
+                        if (!chapterList.contains(event.target) && !checkChapterList.contains(event.target) && !labelCheckChapterList.contains(event.target)) {
+                            chapterList.classList.add('d-none');
+                            boxChapList.classList.remove('opacity-100');
+                            checkChapterList.checked = false;
+                        }
+                    });
+
+                    var Links = document.querySelectorAll('#Main .ActionChapter .ChapterList a');
+                    Links.forEach(link => {
+                        link.addEventListener('click', function () {
+                            checkChapterList.checked = false;
+                        });
+                    });
+                </script>
+            </div>
+            <div class="col-6">
+                @if (ViewBag.startChapter != null)
+                {
+
+                }
+                else
+                {
+                    <a href="~/Novel/ReadingNovel/@ViewBag.prevChapter" class="py-2 mb-2 px-4 rounded-pill text-black border border-dark btnHovered"><i class="fa-solid fa-angle-left"></i> Chương trước</a>
+                }
+            </div>
+            <div class="col-6 text-end">
+                @if (ViewBag.endChapter != null)
+                {
+
+                }
+                else
+                {
+                    <a href="~/Novel/ReadingNovel/@ViewBag.nextChapter" class="py-2 mb-2 px-4 rounded-pill text-black border border-dark btnHovered">Chương sau <i class="fa-solid fa-angle-right"></i></a>
+                }
+
+            </div>
+        </div>
+
+        <div class="row ChapterContent" style="background-color: #f6f1e7;">
+            <!-- Nội dung chapter -->
+            <div class="col-11 col-sm-10 col-md-9 col-lg-9 mx-auto fs-4">
+                @Html.Raw(ViewBag.ContentChapter)
+            </div>
+            <div class="d-flex justify-content-around mt-5">
+                <div class="">
+                    @if (ViewBag.startChapter != null)
+                    {
+
+                    }
+                    else
+                    {
+                        <a href="~/Novel/ReadingNovel/@ViewBag.prevChapter" class="py-2 mb-2 px-4 rounded-pill text-black border border-dark btnHovered"><i class="fa-solid fa-angle-left"></i> Chương trước</a>
+                    }
+                </div>
+                <div class="pb-5">
+                    @if (ViewBag.endChapter != null)
+                    {
+
+                    }
+                    else
+                    {
+                        <a href="~/Novel/ReadingNovel/@ViewBag.nextChapter" class="py-2 mb-2 px-4 rounded-pill text-black border border-dark btnHovered">Chương sau <i class="fa-solid fa-angle-right"></i></a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="row Comments">
+            <form class="d-flex flex-column " onsubmit="HandleCommentCED(this)" data-request="/AreaUser/AUComment/CreateNewComment" method="post">
+                @Html.AntiForgeryToken()
+                <input type="number" hidden value="@ViewBag.Chapter.ChapterID" name="ChapterID" />
+                <textarea class="form-control" rows="4" placeholder="Nhập bình luận của bạn" name="CommentText"></textarea>
+                <button type="submit" class="btn btn-primary my-2 align-self-end">Bình Luận</button>
+            </form>
+            <div class="Comment-List">
+                <ul class="list-group list-group-flush" id="commentList">
+                </ul>
+                <div id="loadingSpinner" class="d-flex justify-content-center d-none">
+                    <div class="spinner-border text-primary mx-auto" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <input type="button" value="Xem thêm" id="loadMoreBtn" class="w-100 mt-4">
+            </div>
+        </div>
+    </div>
+</section>
+
+@section script {
+
+    <!-- onload -->
+    <script>
+        window.onload = function () {
+            IncreaseView();
+            GetAllCommentsNovel();
+            $("#loadMoreBtn").on("click", function () {
+                loadMoreComments(comments);
+            });
+        };
+    </script>
+
+    <!-- buff view -->
+    <script>
+        function IncreaseView() {
+            setTimeout(function () {
+                var urlRequest = '/Novel/IncreaseViews/' + @ViewBag.Chapter.ChapterID;
+                fetch(urlRequest, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('+1 View:', data.message);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }, 10 * 1000);
+        }
+    </script>
+
+    <!-- Comment -->
+    <script>
+        var dataForViewNovel = document.getElementById('DataForViewNovel');
+        var pageComment = 1;
+        var commentsPerPage = 10;
+        var comments;
+
+        function GetAllCommentsNovel() {
+            var url = '/AreaUser/AUComment/GetAllCommentsNovel/' + @ViewBag.Chapter.Novel.NovelID;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                comments = data;
+                document.getElementById('commentList').innerHTML = '';
+                loadMoreComments(comments);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function loadMoreComments(comments) {
+            $("#loadMoreBtn").hide(); // Ẩn nút tải thêm
+            // Hiển thị spinner trong 1 giây trước khi tải dữ liệu
+            $("#loadingSpinner").removeClass("d-none");
+            setTimeout(() => {
+                $("#loadingSpinner").addClass("d-none"); // Ẩn spinner sau 1 giây
+                $("#loadMoreBtn").show(); // Hiển thị lại nút tải thêm
+
+                // Sử dụng slice để lấy số bình luận cần hiển thị trong lần tải thêm
+                const startIndex = (pageComment - 1) * commentsPerPage;
+                const endIndex = startIndex + commentsPerPage;
+                const commentsToShow = comments.slice(startIndex, endIndex);
+
+                if (commentsToShow.length > 0) {
+                    pageComment++; // Tăng số trang lên để chuẩn bị cho lần tải thêm tiếp theo
+                    displayComments(commentsToShow);
+                }
+
+                // Ẩn nút tải thêm và hiển thị thông báo khi hết bình luận
+                if (startIndex + commentsToShow.length >= comments.length) {
+                    $("#loadMoreBtn").hide();
+                    $("#commentList").append("<p class='text-muted'>Không còn bình luận nào khác</p>");
+                }
+            }, 500);
+        }
+
+        function displayComments(comments) {
+            var commentList = document.getElementById('commentList');
+            var cmtElement = '';
+            comments.forEach(comment => {
+                if (comment.UserID == parseInt(dataForViewNovel.dataset.userid)) {
+                    cmtElement = `
+                        <li class="list-group-item ElementOfComments">
+                            <div class="Comment">
+                                <div class="Comment-Parent">
+                                    <div class="User mt-3 d-flex align-items-center">
+                                        <img class="Avatar rounded-circle" src="/Contents/img/Avatar/${comment.Avatar}" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover" />
+                                        <h5 class="mb-0 ms-2">${comment.Username}</h5>
+                                        <div class="ms-auto position-relative Tab-ActionComment" id="Tab-Action">
+                                            <input type="checkbox" hidden id="Cmt_ellipsis-vertical${comment.CommentID}" class="checkboxTabActionComment" />
+                                            <label for="Cmt_ellipsis-vertical${comment.CommentID}" style="cursor: pointer">
+                                                <i class="fa-solid fa-ellipsis-vertical p-2"></i>
+                                            </label>
+                                            <ul class="list-group position-absolute d-none flex-column align-items-start ActionListCmt" id="ActionListCmt${comment.CommentID}" style="width: 500%; border: solid 1px #333; background-color: #fff">
+                                                <li class="list-group-item p-0 w-100">
+                                                    <a href="#" class="Item-Link p-2 d-block w-100 text-start" onclick="OpenFormEditComment(this)" data-commentID="${comment.CommentID}">Chỉnh sửa</a>
+                                                </li>
+                                                <li class="list-group-item p-0 w-100">
+                                                    <form class="d-flex flex-column " onsubmit="HandleCommentCED(this)" data-request="/AreaUser/AUComment/DeleteComment" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="number" hidden value="${comment.CommentID}" name="id" />
+                                                        <input class="Item-Link p-2 d-block w-100 text-start border-0 rounded-start rounded-end" type="submit" value="Xóa" />
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <p class="Comment-content my-3">${comment.CommentText}</p>
+                                    <div class="Action d-flex">
+                                        <ul class="nav">
+                                            <li class="nav-item">
+                                                <small><i class="fa-solid fa-book"></i> Chương ${comment.ChapterNumber}</small>
+                                            </li>
+                                            <li class="nav-item ms-3">
+                                                <small><i class="fa-solid fa-clock"></i></small> <small data-last-update="${comment.CreatedAt}">${comment.CreatedAt}</small>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }
+                else
+                {
+                    cmtElement = `
+                        <li class="list-group-item">
+                            <div class="Comment">
+                                <div class="Comment-Parent">
+                                    <div class="User mt-3 d-flex align-items-center">
+                                        <img class="Avatar rounded-circle" src="/Contents/img/Avatar/${comment.Avatar}" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover" />
+                                        <h5 class="mb-0 ms-2">${comment.Username}</h5>
+                                    </div>
+                                    <p class="Comment-content my-3">${comment.CommentText}</p>
+                                    <div class="Action d-flex">
+                                        <ul class="nav">
+                                            <li class="nav-item">
+                                                <small><i class="fa-solid fa-book"></i> Chương ${comment.ChapterNumber}</small>
+                                            </li>
+                                            <li class="nav-item ms-3">
+                                                <small><i class="fa-solid fa-clock"></i></small> <small data-last-update="${comment.CreatedAt}">${comment.CreatedAt}</small>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }
+                commentList.insertAdjacentHTML('beforeend', cmtElement);
+            });
+            UpdateTimeSince();
+            OpenActionComment();
+        }
+
+        function OpenActionComment() {
+            var tabsActionComment = document.querySelectorAll('.Tab-ActionComment');
+            tabsActionComment.forEach(item => {
+                var inputChkBox = item.querySelector('.checkboxTabActionComment');
+                var actionList = item.querySelector('.ActionListCmt');
+                var label = item.querySelector('label');
+
+                inputChkBox.addEventListener('change', function () {
+                    if (this.checked) {
+                        actionList.classList.remove('d-none');
+                    } else {
+                        actionList.classList.add('d-none');
+                    }
+                });
+
+                document.addEventListener('click', function (event) {
+                    if (!label.contains(event.target) && !inputChkBox.contains(event.target) && !actionList.contains(event.target)) {
+                        inputChkBox.checked = false;
+                        actionList.classList.add('d-none');
+                    }
+                });
+            });
+        }
+
+        function OpenFormEditComment(EditBtn) {
+            event.preventDefault();
+            var parent = EditBtn.closest('.ElementOfComments');
+            var cmtID = EditBtn.dataset.commentid;
+            var url = '/AreaUser/AUComment/EditComment/' + cmtID;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var html = `
+                        <form class="d-flex flex-column" onsubmit="HandleCommentCED(this)" data-request="/AreaUser/AUComment/EditCommented" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="number" hidden value="${data.CommentID}" name="CommentID" />
+                            <input type="number" hidden value="${data.ChapterID}" name="ChapterID" />
+                            <input type="number" hidden value="${data.UserID}" name="UserID" />
+                            <input type="text" hidden value="${data.CreatedAt}" name="Time" />
+                            <textarea class="form-control" rows="4" placeholder="Nhập bình luận của bạn" name="CommentText">${data.CommentText}</textarea>
+                            <button type="submit" class="btn btn-primary my-2 align-self-end">Cập Nhật</button>
+                        </form>
+                    `;
+                    parent.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function HandleCommentCED(form) {
+            event.preventDefault();
+            var requestUrl = form.getAttribute('data-request');
+            var formData = new FormData(form);
+            console.log('Form submitted. Request URL:', requestUrl);
+            console.log('formData:', formData);
+            fetch(requestUrl, {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        switch (data.type) {
+                            case "ondelete":
+                                form.closest('.ElementOfComments').remove();
+                                break;
+                            case "onCreate":
+                                var html = `
+                                    <li class="list-group-item ElementOfComments">
+                                        <div class="Comment">
+                                            <div class="Comment-Parent">
+                                                <div class="User mt-3 d-flex align-items-center">
+                                                    <img class="Avatar rounded-circle" src="/Contents/img/Avatar/${data.comment.Avatar}" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover" />
+                                                    <h5 class="mb-0 ms-2">${data.comment.Username}</h5>
+                                                    <div class="ms-auto position-relative Tab-ActionComment" id="Tab-Action">
+                                                        <input type="checkbox" hidden id="Cmt_ellipsis-vertical${data.comment.CommentID}" class="checkboxTabActionComment" />
+                                                        <label for="Cmt_ellipsis-vertical${data.comment.CommentID}" style="cursor: pointer">
+                                                            <i class="fa-solid fa-ellipsis-vertical p-2"></i>
+                                                        </label>
+                                                        <ul class="list-group position-absolute d-none flex-column align-items-start ActionListCmt" id="ActionListCmt${data.comment.CommentID}" style="width: 500%; border: solid 1px #333; background-color: #fff">
+                                                            <li class="list-group-item p-0 w-100">
+                                                                <a href="#"  class="Item-Link p-2 d-block w-100 text-start" onclick="OpenFormEditComment(this)" data-commentID="${data.comment.CommentID}">Chỉnh sửa</a>
+                                                            </li>
+                                                            <li class="list-group-item p-0 w-100">
+                                                                <form class="d-flex flex-column " onsubmit="HandleCommentCED(this)" data-request="/AreaUser/AUComment/DeleteComment" method="post">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <input type="number" hidden value="${data.comment.CommentID}" name="id" />
+                                                                    <input class="Item-Link p-2 d-block w-100 text-start border-0 rounded-start rounded-end" type="submit" value="Xóa" />
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <p class="Comment-content my-3">${data.comment.CommentText}</p>
+                                                <div class="Action d-flex">
+                                                    <ul class="nav">
+                                                        <li class="nav-item">
+                                                            <small><i class="fa-solid fa-book"></i> Chương ${data.comment.ChapterNumber}</small>
+                                                        </li>
+                                                        <li class="nav-item ms-3">
+                                                            <small><i class="fa-solid fa-clock"></i></small> <small data-last-update="${data.comment.CreatedAt}">${data.comment.CreatedAt}</small>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                `;
+                                document.getElementById('commentList').insertAdjacentHTML('afterbegin', html);
+                                document.querySelector('textarea[name="CommentText"]').value = '';
+                                UpdateTimeSince();
+                                OpenActionComment();
+                                break;
+                            case "onEdit":
+                                var parent = form.closest('.ElementOfComments');
+                                var html = `
+                                        <div class="Comment">
+                                            <div class="Comment-Parent">
+                                                <div class="User mt-3 d-flex align-items-center">
+                                                    <img class="Avatar rounded-circle" src="/Contents/img/Avatar/${data.comment.Avatar}" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover" />
+                                                    <h5 class="mb-0 ms-2">${data.comment.Username}</h5>
+                                                    <div class="ms-auto position-relative Tab-ActionComment" id="Tab-Action">
+                                                        <input type="checkbox" hidden id="Cmt_ellipsis-vertical${data.comment.CommentID}" class="checkboxTabActionComment" />
+                                                        <label for="Cmt_ellipsis-vertical${data.comment.CommentID}" style="cursor: pointer">
+                                                            <i class="fa-solid fa-ellipsis-vertical p-2"></i>
+                                                        </label>
+                                                        <ul class="list-group position-absolute d-none flex-column align-items-start ActionListCmt" id="ActionListCmt${data.comment.CommentID}" style="width: 500%; border: solid 1px #333; background-color: #fff">
+                                                            <li class="list-group-item p-0 w-100">
+                                                                <a href="#"  class="Item-Link p-2 d-block w-100 text-start" onclick="OpenFormEditComment(this)" data-commentID="${data.comment.CommentID}">Chỉnh sửa</a>
+                                                            </li>
+                                                            <li class="list-group-item p-0 w-100">
+                                                                <form class="d-flex flex-column " onsubmit="HandleCommentCED(this)" data-request="/AreaUser/AUComment/DeleteComment" method="post">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <input type="number" hidden value="${data.comment.CommentID}" name="id" />
+                                                                    <input class="Item-Link p-2 d-block w-100 text-start border-0 rounded-start rounded-end" type="submit" value="Xóa" />
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <p class="Comment-content my-3">${data.comment.CommentText}</p>
+                                                <div class="Action d-flex">
+                                                    <ul class="nav">
+                                                        <li class="nav-item">
+                                                            <small><i class="fa-solid fa-book"></i> Chương ${data.comment.ChapterNumber}</small>
+                                                        </li>
+                                                        <li class="nav-item ms-3">
+                                                            <small><i class="fa-solid fa-clock"></i></small> <small data-last-update="${data.comment.CreatedAt}">${data.comment.CreatedAt}</small>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                parent.innerHTML = html;
+                                UpdateTimeSince();
+                                OpenActionComment();
+                                break;
+                        }
+                    })
+                    .catch((error) => {
+                        alert("Xảy ra lỗi");
+                    });
+        }
+
+    </script>
+
+    <!-- Date format -->
+    <script>
+        // Format TimeSince
+        function getTimeSince(dateTime) {
+            var now = new Date();
+            var timeDiff = now - dateTime;
+
+            // Chuyển đổi thời gian từ milliseconds sang giờ, phút, giây
+            var seconds = Math.floor(timeDiff / 1000);
+            var minutes = Math.floor(seconds / 60);
+            var hours = Math.floor(minutes / 60);
+            var days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                return days + " ngày trước";
+            } else if (hours > 0) {
+                return hours + " giờ trước";
+            } else if (minutes > 0) {
+                return minutes + " phút trước";
+            } else {
+                return "Vừa mới đăng";
+            }
+        }
+
+        // update time
+        function UpdateTimeSince() {
+            var timeElements = document.querySelectorAll("[data-last-update]");
+            timeElements.forEach(function (element) {
+                var createdDateString = element.dataset.lastUpdate;
+                var createdDate = new Date(createdDateString);
+                element.innerText = getTimeSince(createdDate);
+            });
+        }
+    </script>
+}

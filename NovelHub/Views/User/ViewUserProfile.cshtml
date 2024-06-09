@@ -1,0 +1,101 @@
+﻿@model PagedList.IPagedList<NovelHub.Models.Novel>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Thông Tin Người Dùng";
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+@section css {
+    <link href="~/Contents/css/ViewUserProfile.css" rel="stylesheet" />
+    <link href="~/Contents/css/PagedList.css" rel="stylesheet" />
+}
+
+<section id="Main" class="my-5">
+    <div class="container position-relative User">
+        <div class="Card row g-0">
+            <div class="Card-img col-12 position-relative Background-User">
+                <img src="~/Contents/img/Background/@ViewBag.User.Background" class="position-absolute rounded-top" style="width:100%; height: 100%; object-fit: cover;">
+                <div class="Overlay-Card"></div>
+            </div>
+        </div>
+        <div class="row position-absolute w-100 p-2 align-items-center" style="bottom: 50%; transform: translateY(50%);">
+            <div class="UserProfile col-5 col-sm-3 col-xl-2">
+                <div class="Avatar position-relative rounded-circle" style="padding-bottom: 100%; box-shadow: 0 0 4px #fff;">
+                    <img src="~/Contents/img/Avatar/@ViewBag.User.Avatar" alt="" class="w-100 h-100 position-absolute rounded-circle" style="object-fit: cover;">
+                </div>
+            </div>
+            <div class="Information col-12 col-sm-9 col-xl-10">
+                <h4 class="UserName text-white fw-bold" style="text-shadow: 0 0 4px #000;">
+                    @ViewBag.User.Username
+                </h4>
+                <div class="Information_Action">
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link text-white disabled">
+                                <span style="text-shadow: 0 0 4px #000;">Truyện Đã Đăng: @ViewBag.NovelsOfUserCount</span>
+                            </a>
+                        </li>
+                        @*<li class="nav-item">
+                                <a class="nav-link text-white disabled">
+                                    <span style="text-shadow: 0 0 4px #000;">Lượt Theo Dõi: 2000</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white rounded-pill" href="#">
+                                    <i class="fa-solid fa-heart"></i>
+                                    <span style="text-shadow: 0 0 4px #000;">Theo Dõi</span>
+                                </a>
+                            </li>*@
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container my-5" id="NovelsOfUser">
+        <div class="row g-5">
+            @{
+                foreach (var item in Model)
+                {
+                    <div class="col-12 col-lg-6 Novel">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-3 col-md-2 col-lg-3 Poster">
+                                    <a href="~/Novel/ViewNovel/@item.NovelID">
+                                        <div class="position-relative" style="padding-bottom: 133.33%;">
+                                            <img src="~/Areas/Author/Contents/img/Poster/@item.Poster" class="rounded-start rounded-end position-absolute w-100 h-100" alt="" style="object-fit: cover;">
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-9 col-md-10 col-lg-9 InformationNovel py-2 ps-0">
+                                    <a href="~/Novel/ViewNovel/@item.NovelID"><h5>@item.Title</h5></a>
+                                    <div class="">
+                                        <small><i class="fa-solid fa-circle-user"></i> @item.Author |</small>
+                                        <small>@item.Chapters.Count Chương |</small>
+                                        <small>@item.NovelStatus.StatusName </small>
+                                    </div>
+                                    <div class="">
+                                        @foreach (var c in item.NovelCategories)
+                                        {
+                                            <small><a href="~/Novel/FindByCategory?categoryID=@c.CategoryID">@c.Category.CategoryName </a>|</small>
+                                        }
+                                    </div>
+                                    <div class="Description-Novel">
+                                        <p class="m-0">
+                                            trừ bỏ nữ chủ cùng cái khác phái nam tứ chi tiếp xúc. 2, áo choàng trùm đầu đổi là nữ tính. 3, trừ bỏ nhân vật chính bị nghe chân giường tình
+                                        </p>
+                                    </div>
+                                    <small>@String.Format("{0:dd/MM/yyyy}", item.CreatedAt) </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div id="pagination-ForNovels" class="my-5">
+            Trang @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+            @Html.PagedListPager(Model, page => Url.Action("ViewUserProfile", new { page }))
+        </div>
+    </div>
+</section>

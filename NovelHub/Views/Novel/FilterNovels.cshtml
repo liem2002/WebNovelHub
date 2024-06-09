@@ -1,0 +1,384 @@
+﻿@model PagedList.IPagedList<NovelHub.Models.Novel>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "FilterNovels";
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+@section css {
+    <link href="~/Contents/css/FillNovels.css" rel="stylesheet" />
+    <link href="~/Contents/css/PagedList.css" rel="stylesheet" />
+}
+<section id="Main" class="my-5">
+    <div class="container FilterResults">
+        <input type="checkbox" name="" hidden id="Filter" class="Btn-Tab-Filter position-relative">
+        <label for="Filter" id="FilterLabel" class="py-2 px-3 d-lg-none" style="color: black; cursor: pointer;">
+            <i class="fa-solid fa-sliders"></i>
+        </label>
+        <div class="row">
+            <div class="Filter col-lg-4 d-none d-lg-block">
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    <form id="sortForm" action="~/Novel/Sort" method="post">
+                        <input type="text" name="searchString" value="@ViewBag.SearchString" hidden>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                        aria-controls="panelsStayOpen-collapseOne">
+                                    Sắp Xếp
+                                </button>
+                            </h2>
+                            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                                <div class="accordion-body">
+                                    <ul class="nav nav-fill">
+                                        @{
+                                            foreach (var item in ViewBag.SortTypes)
+                                            {
+                                                if (ViewBag.SortTypeChk == item.Id)
+                                                {
+                                                    <li class="nav-item d-flex align-items-center">
+                                                        <input class="form-check-input me-1" type="radio" name="sortType" value="@item.Id" id="Sort_@item.Id" checked>
+                                                        <label class="p-2 form-check-label" for="Sort_@item.Id">@item.Type</label>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="nav-item d-flex align-items-center">
+                                                        <input class="form-check-input me-1" type="radio" name="sortType" value="@item.Id" id="Sort_@item.Id">
+                                                        <label class="p-2 form-check-label" for="Sort_@item.Id">@item.Type</label>
+                                                    </li>
+                                                }
+                                            }
+                                        }
+                                    </ul>
+                                    <script>
+                                        autoSubmit();
+
+                                        function autoSubmit() {
+                                            // Lấy ra tất cả các radio inputs trong form
+                                            var radioInputs = document.querySelectorAll('#sortForm input[type="radio"]');
+
+                                            // Lặp qua từng radio input và thêm sự kiện "change"
+                                            radioInputs.forEach(function (radioInput) {
+                                                radioInput.addEventListener('change', function () {
+                                                    // Khi radio input thay đổi, tự động submit form
+                                                    document.getElementById('sortForm').submit();
+                                                });
+                                            });
+                                        }
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <form id="FormFilter" action="~/Novel/Filter" method="post">
+                        <div class="accordion-item" id="Filter_SinceChapter">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#panelsStayOpen-collapseChapter" aria-expanded="false"
+                                        aria-controls="panelsStayOpen-collapseChapter">
+                                    Chương
+                                </button>
+                            </h2>
+                            <div id="panelsStayOpen-collapseChapter" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="nav nav-fill">
+                                        @{
+                                            foreach (var item in ViewBag.SincesChapter)
+                                            {
+                                                if (ViewBag.SinceChk == item.Id)
+                                                {
+                                                    <li class="nav-item d-flex align-items-center ">
+                                                        <input class="form-check-input me-1" type="radio" name="sinceChapter" value="@item.Id"
+                                                               id="Filter_@item.Id" checked>
+                                                        <label class="p-2 form-check-label" for="Filter_@item.Id">@item.Since</label>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="nav-item d-flex align-items-center ">
+                                                        <input class="form-check-input me-1" type="radio" name="sinceChapter" value="@item.Id"
+                                                               id="Filter_@item.Id">
+                                                        <label class="p-2 form-check-label" for="Filter_@item.Id">@item.Since</label>
+                                                    </li>
+                                                }
+
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item" id="Filter_Status">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#panelsStayOpen-collapseStatus" aria-expanded="false"
+                                        aria-controls="panelsStayOpen-collapseStatus">
+                                    Trạng Thái
+                                </button>
+                            </h2>
+                            <div id="panelsStayOpen-collapseStatus" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="nav nav-fill">
+                                        @{
+                                            if (ViewBag.NovelStatuses != null)
+                                            {
+                                                foreach (var item in ViewBag.NovelStatuses)
+                                                {
+                                                    if (ViewBag.StatusChk == item.StatusID)
+                                                    {
+                                                        <li class="nav-item d-flex align-items-center ">
+                                                            <input class="form-check-input me-1" type="radio" name="status" value="@item.StatusID"
+                                                                   id="Status_@item.StatusName" checked>
+                                                            <label class="p-2 form-check-label" for="Status_@item.StatusName">@item.StatusName</label>
+                                                        </li>
+                                                    }
+                                                    else
+                                                    {
+                                                        <li class="nav-item d-flex align-items-center ">
+                                                            <input class="form-check-input me-1" type="radio" name="status" value="@item.StatusID"
+                                                                   id="Status_@item.StatusName">
+                                                            <label class="p-2 form-check-label" for="Status_@item.StatusName">@item.StatusName</label>
+                                                        </li>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item" id="Filter_Categories">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#panelsStayOpen-collapseCategory" aria-expanded="false"
+                                        aria-controls="panelsStayOpen-collapseCategory">
+                                    Thể Loại
+                                </button>
+                            </h2>
+                            <div id="panelsStayOpen-collapseCategory" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="nav nav-fill">
+                                        @{
+                                            if (ViewBag.Categories != null)
+                                            {
+                                                foreach (var item in ViewBag.Categories)
+                                                {
+                                                    if (ViewBag.CategoriesChk != null)
+                                                    {
+                                                        var cgc = ViewBag.CategoriesChk as List<int>;
+                                                        if (cgc.Contains(item.CategoryID))
+                                                        {
+                                                            <li class="nav-item d-flex align-items-center">
+                                                                <input class="form-check-input me-1" type="checkbox" name="categories" value="@item.CategoryID"
+                                                                       id="Catetgory_@item.CategoryName" checked>
+                                                                <label class="p-2 form-check-label" for="Catetgory_@item.CategoryName">@item.CategoryName</label>
+                                                            </li>
+                                                        }
+                                                        else
+                                                        {
+                                                            <li class="nav-item d-flex align-items-center">
+                                                                <input class="form-check-input me-1" type="checkbox" name="categories" value="@item.CategoryID"
+                                                                       id="Catetgory_@item.CategoryName">
+                                                                <label class="p-2 form-check-label" for="Catetgory_@item.CategoryName">@item.CategoryName</label>
+                                                            </li>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <li class="nav-item d-flex align-items-center">
+                                                            <input class="form-check-input me-1" type="checkbox" name="categories" value="@item.CategoryID"
+                                                                   id="Catetgory_@item.CategoryName">
+                                                            <label class="p-2 form-check-label" for="Catetgory_@item.CategoryName">@item.CategoryName</label>
+                                                        </li>
+                                                    }
+
+                                                }
+                                            }
+
+
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#panelsStayOpen-collapseDate" aria-expanded="false"
+                                        aria-controls="panelsStayOpen-collapseDate">
+                                    Ngày Đăng
+                                </button>
+                            </h2>
+                            <div id="panelsStayOpen-collapseDate" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="nav">
+                                        <li class="nav-item">
+                                            <label class="form-check-label p-2" for="Date_From">Từ Ngày</label>
+                                            <input class="me-1" type="date" name="dateFrom" value="" id="Date_From">
+                                        </li>
+                                        <li class="nav-item">
+                                            <label class="form-check-label p-2" for="Date_To">Đến Ngày</label>
+                                            <input class="me-1" type="date" name="dateTo" value="" id="Date_To">
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="submit" class="btn btn-primary m-2" value="Hoàn Thành">
+                    </form>
+                    <script>
+                        function ActiveAccordionItem(elementID) {
+                            var accordionItem = document.getElementById(elementID);
+                            var button = accordionItem.querySelector('button');
+                            button.classList.remove('collapsed');
+                            button.setAttribute('aria-expanded', 'true');
+                            accordionItem.querySelector('.accordion-collapse').classList.add('show');
+                        }
+                    </script>
+                    @{
+                        if (ViewBag.SinceChk != null && ViewBag.SinceChk != 1)
+                        {
+                            <script>ActiveAccordionItem("Filter_SinceChapter")</script>
+                        }
+                        if (ViewBag.StatusChk != null && ViewBag.StatusChk != 0)
+                        {
+                            <script>ActiveAccordionItem('Filter_Status')</script>
+                        }
+                        if (ViewBag.CategoriesChk != null)
+                        {
+                            <script>ActiveAccordionItem('Filter_Categories')</script>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="Results col-12 col-lg-8">
+                <div class="container-fluid">
+                    @{
+                        foreach (var item in Model)
+                        {
+                            <a href="~/Novel/ViewNovel/@item.NovelID" class="row ResultItem">
+                                <div class="Box-Poster col-2 col-sm-2 p-0">
+                                    <div class="Poster">
+                                        <img src="~/Areas/Author/Contents/img/Poster/@item.Poster" class="rounded-start" data-poster="Poster" alt="Poster">
+                                    </div>
+                                </div>
+                                <div class="col-10 col-sm-10 InformationNovel">
+                                    <div class="d-flex justify-content-between">
+                                        <h5>@item.Title</h5><small>@item.NovelStatus.StatusName</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between Link-User d-none d-md-flex">
+                                        <div class="d-flex">
+                                            <div class="Avater">
+                                                <img src="~/Contents/img/Avatar/@item.User.Avatar" alt="">
+                                            </div>
+                                            <span class="m-0 ms-2">@item.User.Username</span>
+                                        </div>
+                                        <span class="m-0 ms-2 align-items-end">Ngày đăng : @String.Format("{0:dd/MM/yyyy}", item.CreatedAt)</span>
+                                    </div>
+                                    <div class="CategoryList my-2">
+                                        @{
+                                            if (item.NovelCategories != null)
+                                            {
+                                                foreach (var category in item.NovelCategories.ToList())
+                                                {
+                                                    <span class="me-2">@category.Category.CategoryName</span>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                    <span class="px-2 py-1 Link-Detail-Novel">@item.Chapters.Count Chương</span>
+                                    <span class="px-2 py-1">
+
+                                        @if (item.Chapters.OrderBy(c => c.ChapterNumber).LastOrDefault() != null)
+                                        {
+                                            var time = item.Chapters.OrderBy(c => c.ChapterNumber).LastOrDefault().CreatedAt;
+                                            <small class="text-body-secondary" data-last-update="@time">@time</small>
+                                        }
+                                        else
+                                        {
+                                            
+                                            <small class="text-body-secondary" data-last-update="@item.CreatedAt?.ToString("yyyy-MM-ddTHH:mm:ss")">@item.CreatedAt</small>
+
+                                        }
+                                    </span>
+                                    @{
+                                        if (item.Description != null)
+                                        {
+                                            string novelDescription = item.Description.ToString();
+
+                                            // Xóa tất cả các thẻ HTML bằng cách sử dụng Regex
+                                            string sanitizedDescription = System.Text.RegularExpressions.Regex.Replace(novelDescription, "<.*?>", "");
+
+                                            <p class="m-0 Description-Novel my-1">@Html.Raw(sanitizedDescription)</p>
+                                        }
+                                    }
+                                </div>
+                            </a><hr>
+                        }
+                    }
+                </div>
+                <div class="Pagination float-end">
+                    Trang @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+                    @Html.PagedListPager(Model, page => Url.Action("FilterNovels", new { page }))
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section script {
+    <script src="~/Contents/assets/js/BoLoc.js"></script>
+    <script>
+        document.getElementById('GoToFilterNovels').classList.add('active')
+    </script>
+    @{
+        if (ViewBag.SearchString != null)
+        {
+            <script>
+            var inputElement = document.querySelector('input[name="searchString"]');
+            inputElement.value = '@Html.Raw(ViewBag.SearchString)';
+            </script>
+        }
+    }
+
+    <!-- Date format -->
+    <script>
+        // Format TimeSince
+        function getTimeSince(dateTime) {
+            var now = new Date();
+            var timeDiff = now - dateTime;
+
+            // Chuyển đổi thời gian từ milliseconds sang giờ, phút, giây
+            var seconds = Math.floor(timeDiff / 1000);
+            var minutes = Math.floor(seconds / 60);
+            var hours = Math.floor(minutes / 60);
+            var days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                return days + " ngày trước";
+            } else if (hours > 0) {
+                return hours + " giờ trước";
+            } else if (minutes > 0) {
+                return minutes + " phút trước";
+            } else {
+                return "Vừa mới đăng";
+            }
+        }
+
+        // update time
+        function UpdateTimeSince() {
+            var timeElements = document.querySelectorAll("[data-last-update]");
+            timeElements.forEach(function (element) {
+                var createdDateString = element.dataset.lastUpdate;
+                var createdDate = new Date(createdDateString);
+                element.innerText = getTimeSince(createdDate);
+            });
+        }
+        UpdateTimeSince();
+    </script>
+
+}
+

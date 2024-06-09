@@ -1,0 +1,159 @@
+﻿@model PagedList.IPagedList<NovelHub.Models.Novel>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Truyện Đang Theo Dõi";
+    Layout = "~/Views/Shared/SimplifyLayout.cshtml";
+}
+
+@section css {
+    <link href="~/Contents/css/PagedList.css" rel="stylesheet" />
+    <style>
+        #Main a {
+            color: #000;
+        }
+
+        #Main .InformationNovel > a:hover {
+            color: var(--primaty-color);
+        }
+
+        #Main .Poster a div {
+            overflow: hidden;
+        }
+
+        #Main .Poster img {
+            transition: all 0.5s ease-in-out;
+        }
+
+            #Main .Poster img:hover {
+                transform: scale(1.07);
+            }
+    </style>
+}
+
+<div class="col-12 col-lg-9">
+    <div class="container-fluid" id="FavoritedNovels">
+        <h6>Tìm thấy @Model.Count truyện</h6><hr />
+        <div class="row g-3">
+            @{
+                foreach (var item in Model)
+                {
+                    <div class="col-md-6 Novel">
+                        <div class="container-fluid rounded-start rounded-end">
+                            <div class="row">
+                                <div class="col-3 ps-0 Poster">
+                                    <a href="~/Novel/ViewNovel/@item.NovelID">
+                                        <div class="position-relative" style="padding-bottom: 133.33%;">
+                                            <img src="~/Areas/Author/Contents/img/Poster/@item.Poster" class="rounded-start rounded-end position-absolute w-100 h-100" alt="" style="object-fit: cover;">
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-9 ps-0 InformationNovel">
+                                    <a href="~/Novel/ViewNovel/@item.NovelID"><h5>@item.Title</h5></a>
+                                    <a href="~/User/ViewUserProfile/@item.User.UserID"><small><i class="fa-solid fa-circle-user"></i> Người đăng: @item.User.Username </small></a>
+                                    <div class="">
+                                        <small>@item.Chapters.Count Chương |</small>
+                                        <small>@item.NovelStatus.StatusName </small>
+                                    </div>
+                                    <small>Cập Nhật: <span data-last-update="@item.LastUpdate">@item.LastUpdate</span> </small>
+                                    <div class="mt-auto">
+                                        @*<form action="~/AreaUser/AUManagerProfile/RemoveFavoriteNovel/@item.NovelID" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="submit" value="Bỏ Theo Dõi" class="btn btn-danger rounded-start rounded-end px-2 py-0 float-end fw-bold text-black" />
+                                        </form>*@
+                                        <a href="/AreaUser/AUManagerProfile/RemoveFavoriteNovel/@item.NovelID" class="FollowBtn btn btn-danger rounded-start rounded-end px-2 py-0 float-end fw-bold">Bỏ Theo Dõi</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><hr />
+                    </div>
+                }
+            }
+        </div>
+        <div id="pagination-ForNovels" class="my-5">
+            Trang @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+            @Html.PagedListPager(Model, page => Url.Action("ViewUserProfile", new { page }))
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        var favoritedNovels = document.querySelectorAll('#FavoritedNovels .Novel');
+        favoritedNovels.forEach(item => {
+            var taga = item.querySelector('.FollowBtn');
+            taga.addEventListener('click', function (event) {
+                event.preventDefault();
+                var url = taga.href;
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            item.remove();
+                        }
+                    })
+                    .catch(error => {
+                        alert("Lỗi");
+                    });
+            });
+        })
+        
+    </script>
+    <script>
+        function getTimeSince(dateTime) {
+            var now = new Date();
+            var timeDiff = now - dateTime;
+
+            // Chuyển đổi thời gian từ milliseconds sang giờ, phút, giây
+            var seconds = Math.floor(timeDiff / 1000);
+            var minutes = Math.floor(seconds / 60);
+            var hours = Math.floor(minutes / 60);
+            var days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                return days + " ngày trước";
+            } else if (hours > 0) {
+                return hours + " giờ trước";
+            } else if (minutes > 0) {
+                return minutes + " phút trước";
+            } else {
+                return "Vừa mới đăng";
+            }
+        }
+
+        // update time
+        function UpdateTimeSince() {
+            var timeElements = document.querySelectorAll("[data-last-update]");
+            timeElements.forEach(function (element) {
+                var createdDateString = element.dataset.lastUpdate;
+                var createdDate = new Date(createdDateString);
+                element.innerText = getTimeSince(createdDate);
+            });
+        }
+
+        // js side bar
+        var linksSideBar = document.querySelectorAll('#Main .SideBar .nav-link');
+        function removeActive() {
+            linksSideBar.forEach(element => {
+                element.classList.remove('active');
+            })
+        }
+        function start() {
+            UpdateTimeSince();
+            removeActive();
+            linksSideBar.forEach(element => {
+                if (element.textContent.includes('Truyện Yêu Thích')) {
+                    element.classList.add('active')
+                }
+            });
+        }
+        start();
+    </script>
+
+
+}

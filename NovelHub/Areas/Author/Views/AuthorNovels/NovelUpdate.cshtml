@@ -1,0 +1,144 @@
+﻿@model NovelHub.Models.Novel
+@{
+    ViewBag.Title = "Chỉnh sửa";
+    Layout = "~/Views/Shared/SimplifyLayout.cshtml";
+}
+
+@section css {
+
+}
+
+<div class="col-12 col-lg-9">
+    <div class="container">
+        <h3 class="ms-4 mb-0">Chỉnh sửa truyện - @Model.Title</h3>
+        <form action="~/Author/AuthorNovels/NovelUpdate" enctype="multipart/form-data" method="post" class="p-5">
+            @Html.AntiForgeryToken()
+            <input type="text" class="form-control" hidden value="@Model.NovelID" name="NovelID">
+            <input type="text" class="form-control" hidden value="@Model.UserID" name="UserID">
+            <input type="text" class="form-control" hidden value="@Model.Poster" name="originPoster">
+            <input type="datetime" class="form-control" hidden value="@Model.CreatedAt" name="time">
+            <div class="mb-3 row">
+                <label for="NovelName" class="col-xl-2 col-lg-3 col-form-label">Tên truyện: </label>
+                <div class="col-12 col-lg-9 col-xl-10">
+                    <input type="text" class="form-control" id="NovelName" placeholder="Tên truyện" value="@Model.Title" name="Title">
+                    <span class="text-danger" id="NovelNameMessageError">@ViewBag.ErrorBookTitle</span>
+                </div>
+                <script>
+                    document.getElementById('NovelName').addEventListener('blur', function () {
+                        if (!this.value) {
+                            document.getElementById('NovelNameMessageError').textContent = "Vui lòng nhập trường này";
+                        }
+                    })
+                    document.getElementById('NovelName').addEventListener('input', function () {
+                        document.getElementById('NovelNameMessageError').textContent = "";
+                    })
+                </script>
+            </div>
+            <div class="mb-3 row">
+                <label for="NovelAuthor" class="col-xl-2 col-lg-3 col-form-label">Tác giả: </label>
+                <div class="col-12 col-lg-9 col-xl-10">
+                    <input type="text" class="form-control" id="NovelAuthor" placeholder="Tác giả" value="@Model.Author" name="Author">
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="NovelPoster" class="col-xl-2 col-lg-3 col-form-label">Poster truyện: </label>
+                <div class="col-12 col-lg-9 col-xl-10">
+                    <input type="file" class="form-control" id="NovelPoster" name="Poster">
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="NovelStatus" class="col-xl-2 col-lg-3 col-form-label">Trạng thái: </label>
+                <div class="col-12 col-lg-9 col-xl-10">
+                    <div class="row">
+                        @foreach (var item in ViewBag.NovelStatuses)
+                        {
+                            <div class="col-sm-6 col-xl-4">
+                                <div class="form-check">
+                                    @if (Model.StatusID == item.StatusID)
+                                    {
+                                        <input class="form-check-input" type="radio" id="radioStatusBook_@item.StatusID" checked value="@item.StatusID" name="StatusID">
+                                    }
+                                    else
+                                    {
+                                        <input class="form-check-input" type="radio" id="radioStatusBook_@item.StatusID" value="@item.StatusID" name="StatusID">
+                                    }
+                                    <label class="form-check-label" for="radioStatusBook_@item.StatusID">
+                                        @item.StatusName
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="NovelCategory" class="col-xl-2 col-lg-3 col-form-label">Thể loại: </label>
+                <div class="col-12 col-lg-9 col-xl-10">
+                    <div class="row">
+                        @foreach (var item in ViewBag.Categories)
+                        {
+                            if (Model.NovelCategories.SingleOrDefault(m => m.CategoryID == item.CategoryID) != null)
+                            {
+                                <div class="col-sm-6 col-xl-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="@item.CategoryID" id="Categor_@item.CategoryID" checked name="CategoriesList">
+                                        <label class="form-check-label" for="Categor_@item.CategoryID">
+                                            @item.CategoryName
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-sm-6 col-xl-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="@item.CategoryID" id="Categor_@item.CategoryID" name="CategoriesList">
+                                        <label class="form-check-label" for="Categor_@item.CategoryID">
+                                            @item.CategoryName
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="NovelIntroduction" class="col-xl-2 col-lg-3 col-form-label">Giới thiệu: </label>
+                <div class="col-12 col-lg-9 col-xl-10">
+                    <textarea class="form-control" id="NovelIntroduction" name="Description">@Model.Description</textarea>
+                    <script>
+                        // Khởi tạo CKEditor
+                        CKEDITOR.replace('NovelIntroduction');
+                    </script>
+                </div>
+            </div>
+            <div class="mb-3 text-end">
+                <a href="~/Author/AuthorNovels/PublishedNovel" class="btn btn-dark">Quay lại</a>
+                <input type="submit" class="btn btn-success" value="Cập nhật">
+            </div>
+        </form>
+    </div>
+</div>
+
+@section script {
+    <script>
+        // js side bar
+        var linksSideBar = document.querySelectorAll('#Main .SideBar .nav-link');
+        function removeActive() {
+            linksSideBar.forEach(element => {
+                element.classList.remove('active');
+            })
+        }
+        function start() {
+            removeActive();
+            linksSideBar.forEach(element => {
+                if (element.textContent.includes('Truyện Đã Đăng')) {
+                    element.classList.add('active')
+                }
+            })
+        }
+        start();
+    </script>
+}
+

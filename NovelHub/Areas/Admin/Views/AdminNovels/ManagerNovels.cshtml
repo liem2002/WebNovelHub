@@ -1,0 +1,172 @@
+﻿@model PagedList.IPagedList<NovelHub.Models.Novel>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "ManagerNovels";
+    Layout = "~/Views/Shared/SimplifyLayout.cshtml";
+}
+
+@section css {
+    <link href="~/Contents/css/PagedList.css" rel="stylesheet" />
+}
+
+<div class="col-12 col-lg-9">
+    @*<div class="row mb-3">
+        <div class="col-6 ms-auto">
+            <form class="d-flex align-items-stretch rounded-pill m-2 w-100 custom-form bg-white" style="border: solid 2px #00dc82;">
+                <input type="text" class="w-100 py-1 border-0 ps-3 rounded-pill flex-fill" placeholder="Search" style="outline: none;">
+                <button type="submit" class="px-3 border-0 rounded-pill bg-body">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </form>
+        </div>
+    </div>*@
+    <div class="container">
+        <div class="d-flex justify-content-between my-3 flex-wrap">
+            <h3 class="mb-3">Quản Lý Truyện - @ViewBag.CountNovels</h3>
+            <a href="~/Author/AuthorNovels/PublishNovel" class="btn btn-primary mb-3">Thêm Truyện Mới</a>
+        </div>
+        <div id="wrapperPages">
+            <div class="data-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Truyện</th>
+                                <th class="d-none d-md-table-cell">Số Chương</th>
+                                <th>Người đăng</th>
+                                <th class="d-none d-lg-table-cell">Ngày đăng</th>
+                                <th>Chức Năng</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            @{
+                                int index = 0;
+                                foreach (var item in Model)
+                                {
+                                    index++;
+                                    int stt = (ViewBag.CurrentPage - 1) * ViewBag.pageSize + index;
+                                    <tr>
+                                        <th>@stt</th>
+                                        <td><a href="~/Admin/AdminNovels/ViewNovel/@item.NovelID">@item.Title</a></td>
+                                        <td class="d-none d-md-table-cell">@item.Chapters.Count()</td>
+                                        <td>@item.User.Username</td>
+                                        <td class="d-none d-lg-table-cell">@item.CreatedAt.Value.ToString("dd-MM-yyyy")</td>
+                                        <td class="d-flex justify-content-between">
+                                            @if (item.BlacklistedNovels.Count > 0)
+                                            {
+                                                <a href="#" class="text-success fw-bold" data-bs-toggle="modal" data-bs-target="#NovelPublicModal_@item.NovelID">| Duyệt |</a>
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="NovelPublicModal_@item.NovelID" tabindex="-1" aria-labelledby="NovelPublicModalLabel_@item.NovelID" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <form action="~/Admin/AdminNovels/RemoveBackListNovel?novelID=@item.NovelID" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h1 class="modal-title fs-5" id="NovelPublicModalLabel_@item.NovelID">Xác nhận duyệt</h1>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    bạn có chắc muốn duyệt truyện "@item.Title" không?
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                                    <input type="submit" class="btn btn-success" value="Duyệt" />
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <a href="#" class="text-danger fw-bold" data-bs-toggle="modal" data-bs-target="#NovelLockModal_@item.NovelID">| Khóa |</a>
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="NovelLockModal_@item.NovelID" tabindex="-1" aria-labelledby="NovelLockModalLabel_@item.NovelID" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <form action="~/Admin/AdminNovels/AddBackListNovel" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h1 class="modal-title fs-5" id="NovelLockModalLabel_@item.NovelID">Xác nhận khóa</h1>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    bạn có chắc muốn khóa truyện "@item.Title" không?
+                                                                    <input type="text" hidden value="@item.NovelID" name="NovelID" />
+                                                                    <div class="form-group my-3">
+                                                                        <label class="col-md-12 my-1 control-label" for="NoteBlackBook">Ghi chú</label>
+                                                                        <div class="col-md-12">
+                                                                            <input class="form-control" id="NoteBlackBook" type="text" name="Note">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                                    <input type="submit" class="btn btn-danger" value="Khóa" />
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <a href="#" class="text-danger fw-bold" data-bs-toggle="modal" data-bs-target="#NovelDeleteModal_@item.NovelID">| Xóa |</a>
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="NovelDeleteModal_@item.NovelID" tabindex="-1" aria-labelledby="NovelDeleteModalLabel_@item.NovelID" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="NovelDeleteModalLabel_@item.NovelID">Xác nhận xóa</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            bạn có chắc muốn xóa truyện "@item.Title" không?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                            <form action="~/Admin/AdminNovels/DeleteNovel/@item.NovelID" method="post">
+                                                                @Html.AntiForgeryToken()
+                                                                <input type="submit" class="btn btn-danger" value="Xóa" />
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    stt++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="pagination-ForNovels" class="my-5">
+                Trang @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+                @Html.PagedListPager(Model, page => Url.Action("ManagerNovels", new { page }))
+            </div>
+        </div>
+    </div>
+
+    @section script{
+        <script>
+            // js side bar
+            var linksSideBar = document.querySelectorAll('#Main .SideBar .nav-link');
+            function removeActive() {
+                linksSideBar.forEach(element => {
+                    element.classList.remove('active');
+                })
+            }
+            function start() {
+                removeActive();
+                linksSideBar.forEach(element => {
+                    if (element.textContent.includes('Quản Lý Truyện')) {
+                        element.classList.add('active')
+                    }
+                })
+            }
+            start();
+        </script>
+        @ViewBag.ClickToast
+    }

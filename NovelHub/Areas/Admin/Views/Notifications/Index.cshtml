@@ -1,0 +1,71 @@
+﻿@model IEnumerable<NovelHub.Models.Notification>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/SimplifyLayout.cshtml";
+    ViewBag.NotificationNotRead = ViewBag.NotificationNotRead;
+}
+
+<div class="col-12 col-lg-9">
+    <div class="container">
+        <table class="table">
+            <tr>
+                <th>
+                    Nội dung
+                </th>
+                <th>
+                    Thời gian
+                </th>
+                <th>
+                    Tên người dùng
+                </th>
+                <th>
+                    Chức năng
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="/Admin/Notifications/Details/@item.NotificationID">
+                            @Html.DisplayFor(modelItem => item.Content)
+                        </a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.User.Username)
+                    </td>
+                    <td>
+                        @*@Html.ActionLink("Edit", "Edit", new { id = item.NotificationID }) |
+                        @Html.ActionLink("Details", "Details", new { id = item.NotificationID }) |*@
+                        @Html.ActionLink("Delete", "Delete", new { id = item.NotificationID })
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>
+
+
+<script>
+        // js side bar
+        var linksSideBar = document.querySelectorAll('#Main .SideBar .nav-link');
+        function removeActive() {
+            linksSideBar.forEach(element => {
+                element.classList.remove('active');
+            })
+        }
+        function start() {
+            removeActive();
+            linksSideBar.forEach(element => {
+                if (element.textContent.includes('Quản Lý Thông Báo')) {
+                    element.classList.add('active')
+                }
+            })
+        }
+        start();
+</script>

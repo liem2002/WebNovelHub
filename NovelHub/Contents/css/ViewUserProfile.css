@@ -1,0 +1,48 @@
+﻿#Main a {
+    color: #000;
+}
+
+    #Main a:hover {
+        color: var(--primaty-color);
+    }
+
+#Main .User .Background-User {
+    padding-bottom: 70%;
+}
+
+#Main .Pagination .page-link.active {
+    color: #fff;
+}
+
+@media (min-width: 576px) {
+    #Main .User .Background-User {
+        padding-bottom: 33.33%;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+
+    #Main .Information {
+        zoom: 0.8;
+    }
+}
+
+#Main #NovelsOfUser .Description-Novel p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#Main #NovelsOfUser .Novel .Poster a div {
+    overflow: hidden;
+}
+
+#Main #NovelsOfUser .Novel .Poster img {
+    transition: all 0.5s ease-in-out;
+}
+
+#Main #NovelsOfUser .Novel .Poster img:hover {
+    transform: scale(1.07);
+}

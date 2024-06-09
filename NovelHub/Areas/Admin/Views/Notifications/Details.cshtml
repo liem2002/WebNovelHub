@@ -1,0 +1,102 @@
+﻿@model NovelHub.Models.Notification
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/SimplifyLayout.cshtml";
+}
+
+<div class="col-12 col-lg-9">
+    <div class="container">
+        <div>
+            <h4>Notification</h4>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Content)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Content)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Timestamp)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Timestamp)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.Username)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.Username)
+                </dd>
+                <dt>
+                    Cấp quyền tại đây
+                </dt>
+                <dd>
+                    <a href="#" class="fw-bold" data-bs-toggle="modal" data-bs-target="#RoleForUserModal_@Model.User.UserID">| @Model.User.Role.RoleName |</a>
+                    <!-- Modal -->
+                    <div class="modal fade" id="RoleForUserModal_@Model.User.UserID" tabindex="-1" aria-labelledby="RoleForUserModalLabel_@Model.User.UserID" aria-hidden="true">
+                        <div class="modal-dialog" style="transform: translateY(100%);">
+                            <form action="~/Admin/AdminUsers/ChangeUserRole?userID=@Model.User.UserID" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="RoleForUserModalLabel_@Model.User.UserID">Cấp Quyền</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group d-flex justify-content-around">
+                                            @foreach (var Role in ViewBag.Roles)
+                                            {
+                                                <div>
+                                                    @if (Role.RoleID == Model.User.RoleID)
+                                                    {
+                                                        <input class="form-check-input" type="radio" checked name="Role" id="@Model.User.UserID-radioRoleForUser_@Role.RoleID" value="@Role.RoleID">
+                                                    }
+                                                    else
+                                                    {
+                                                        <input class="form-check-input" type="radio" name="Role" id="@Model.User.UserID-radioRoleForUser_@Role.RoleID" value="@Role.RoleID">
+                                                    }
+                                                    <label class="form-check-label" style="cursor: pointer;" for="@Model.User.UserID-radioRoleForUser_@Role.RoleID">@Role.RoleName</label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <input type="submit" class="btn btn-success" value="Hoàn Thành" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+        
+<script>
+        // js side bar
+        var linksSideBar = document.querySelectorAll('#Main .SideBar .nav-link');
+        function removeActive() {
+            linksSideBar.forEach(element => {
+                element.classList.remove('active');
+            })
+        }
+        function start() {
+            removeActive();
+            linksSideBar.forEach(element => {
+                if (element.textContent.includes('Quản Lý Thông Báo')) {
+                    element.classList.add('active')
+                }
+            })
+        }
+        start();
+</script>

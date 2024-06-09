@@ -1,0 +1,1102 @@
+﻿
+@{
+    ViewBag.Title = "Xem Truyện";
+    Layout = "~/Views/Shared/Layout.cshtml";
+    var currentUser = (NovelHub.Models.User)HttpContext.Current.Session["User"];
+    var userid = -1;
+    if (currentUser != null)
+    {
+        userid = currentUser.UserID;
+    }
+    var similarNovels = ViewData["SimilarNovels"] as List<NovelHub.Models.Novel>;
+}
+
+@section css {
+    <style>
+
+        :root {
+            --primaty-color: #00dc82;
+            --text-bg: #fff;
+            --text-color: #000;
+        }
+
+        * {
+            /* user-select: none; */
+        }
+
+        body {
+            background-image: linear-gradient( #00dc8035, #fff);
+        }
+
+        #Main a {
+            color: #000;
+        }
+
+        #Main .InformationNovel {
+            border: solid 4px #fff;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+            #Main .InformationNovel .Poster {
+                padding-bottom: 140%;
+            }
+
+                #Main .InformationNovel .Poster img {
+                    object-fit: cover;
+                    border: solid 2px var(--primaty-color);
+                }
+
+            #Main .InformationNovel .Introduction .Avater {
+                width: 32px;
+                height: 32px;
+            }
+
+            #Main .InformationNovel .Introduction .UserName {
+                font-size: 1.2rem;
+                font-weight: 500;
+            }
+
+            #Main .InformationNovel .Introduction .Category-List {
+                display: -webkit-box;
+                -webkit-line-clamp: 1; /* Số dòng tối đa muốn hiển thị */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            #Main .InformationNovel .Introduction .nav-link {
+                display: inline-block;
+                margin: 0 4px;
+                border: solid 2px var(--primaty-color);
+                font-weight: 500;
+                border-radius: 4px;
+            }
+
+                #Main .InformationNovel .Introduction .nav-link:hover {
+                    background-color: var(--primaty-color);
+                    color: var(--text-bg);
+                }
+
+            #Main .InformationNovel .Introduction .FeedbackWrapper {
+                font-weight: 500;
+            }
+
+            #Main .InformationNovel .Introduction .Description-Novel p {
+                display: -webkit-box;
+                -webkit-line-clamp: 3; /* Số dòng tối đa muốn hiển thị */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                text-align: justify;
+                hyphens: auto;
+                margin-bottom: 0;
+            }
+
+            #Main .InformationNovel .Introduction .Action a {
+                font-weight: 500;
+                border: solid 2px var(--primaty-color);
+                border-radius: 4px;
+            }
+
+                #Main .InformationNovel .Introduction .Action a:hover {
+                    opacity: 0.5;
+                }
+
+            #Main .InformationNovel .Introduction .Action .Reading a {
+                background-color: var(--primaty-color);
+                color: var(--text-bg);
+            }
+
+            #Main .InformationNovel .Introduction .Action .Following a {
+                color: var(--primaty-color);
+            }
+
+        #Main .ActionNovel .nav-tabs .nav-item .nav-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+            #Main .ActionNovel .nav-tabs .nav-item .nav-link.active {
+                color: #00dc82;
+                background-color: transparent;
+                border: none;
+            }
+
+        #Main .ActionNovel .tab-content #infomation-tab-pane .Description-Novel a:hover {
+            color: var(--primaty-color);
+        }
+
+        #Main .ActionNovel .tab-content #infomation-tab-pane .Introduction p {
+            text-align: justify;
+            hyphens: auto;
+            /* white-space: pre-line; */
+            margin-bottom: 0;
+        }
+
+        #Main .ActionNovel .tab-content .UserProfile .Information .Action .nav-item a:hover {
+            background-color: var(--primaty-color);
+            color: #fff;
+            border-radius: var(--bs-border-radius-pill)
+        }
+
+        #Main .ActionNovel .tab-content .UserProfile {
+            border: solid 1px #00dc82;
+        }
+
+            #Main .ActionNovel .tab-content .UserProfile .Avatar {
+                padding-bottom: 75%;
+            }
+
+                #Main .ActionNovel .tab-content .UserProfile .Avatar img {
+                    object-fit: cover;
+                }
+
+        #Main .ActionNovel .tab-content .paginationjs {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+            #Main .ActionNovel .tab-content .paginationjs .paginationjs-pages ul {
+                list-style: none;
+                display: flex;
+                flex-wrap: wrap;
+                padding-left: 0;
+                margin-bottom: 0;
+            }
+
+                #Main .ActionNovel .tab-content .paginationjs .paginationjs-pages ul li {
+                }
+
+            #Main .ActionNovel .tab-content .paginationjs .paginationjs-pages li > a {
+                display: block;
+                padding: 4px 24px;
+                border: solid 1px #33333340;
+                cursor: pointer;
+            }
+
+                #Main .ActionNovel .tab-content .paginationjs .paginationjs-pages li > a:hover {
+                    background-color: var(--primaty-color);
+                }
+
+            #Main .ActionNovel .tab-content .paginationjs .paginationjs-pages li.active a {
+                background-color: var(--primaty-color);
+                border: solid 1px var(--primaty-color);
+                color: #fff;
+            }
+
+            #Main .ActionNovel .tab-content .paginationjs .paginationjs-go-input {
+                margin: 0 8px;
+                min-width: 59px;
+                max-width: 60px;
+            }
+
+                #Main .ActionNovel .tab-content .paginationjs .paginationjs-go-input input {
+                    height: 100%;
+                    width: 100%;
+                }
+
+            #Main .ActionNovel .tab-content .paginationjs .paginationjs-go-button input {
+                height: 100%;
+                padding: 0 16px;
+            }
+
+        #Main .ActionNovel .tab-content .Box-Chapter-Link {
+            height: 100%;
+            border: solid 1px #33333340;
+        }
+
+            #Main .ActionNovel .tab-content .Box-Chapter-Link:hover {
+                background-color: #00dc803f;
+            }
+
+        #Main .ActionNovel .tab-content .Chapter-Link {
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Số dòng tối đa muốn hiển thị */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #Main .ActionNovel .tab-content #Comment-tab-pane .list-group-item {
+            background-color: transparent;
+        }
+
+        #Main .ActionNovel .tab-content #Rate-tab-pane .rating-container .RateList .Rate #Tab-Action ul.list-group,
+        #Main .ActionNovel .tab-content #Comment-tab-pane .Comment-List .Comment #Tab-Action ul.list-group {
+            width: 500%;
+            border: solid 1px #333;
+            background-color: #fff;
+            right: 0;
+        }
+
+        #Main .ActionNovel .tab-content #Comment-tab-pane .Comment-List .Comment-Child .Action .nav-link.active,
+        #Main .ActionNovel .tab-content #Comment-tab-pane .Comment-List .Comment-Parent .Action .nav-link.active {
+            color: var(--primaty-color);
+        }
+
+        /* rate */
+        .rating-container {
+            text-align: center;
+        }
+
+        .stars {
+            font-size: 30px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .star {
+            color: #ddd;
+            transition: color 0.3s;
+        }
+
+            .star.active,
+            .star:hover {
+                color: gold;
+            }
+
+        .rating-text {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+
+        /* Tab action */
+
+        #Tab-Action .Item-Link {
+        }
+
+            #Tab-Action .Item-Link:hover {
+                background-color: #00dc82;
+                color: #fff;
+            }
+    </style>
+}
+
+<span id="DataForViewNovel" class="d-none" data-userid="@userid"></span>
+<section id="Main" class="py-3">
+    <div class="container px-lg-5">
+        <div class="px-lg-5">
+            <div class="row g-0 InformationNovel">
+                <div class="col-sm-3 col-4 mx-auto">
+                    <div class="Poster position-relative">
+                        <img src="~/Areas/Author/Contents/img/Poster/@ViewBag.novel.Poster" class="rounded position-absolute w-100 h-100" alt="PosterImg">
+                    </div>
+                </div>
+                <div class="col-sm-9 Introduction px-4">
+                    <div class="d-flex align-items-center justify-content-sm-start my-3 flex-column flex-sm-row">
+                        <h2 class="text-center text-sm-start my-2">@ViewBag.novel.Title</h2>
+                        <small class="ms-auto mb-2">@ViewBag.novel.NovelStatus.StatusName</small>
+                    </div>
+
+                    <nav class="nav Category-List">
+
+                        @foreach (var c in @ViewBag.novel.NovelCategories)
+                        {
+                            <a class="nav-link px-2 py-1 mb-2" href="~/Novel/FindByCategory?categoryID=@c.CategoryID">@c.Category.CategoryName</a>
+                        }
+                    </nav>
+                    <div class="p-2 d-flex Link-User d-md-flex">
+                        <span class="fw-bold">Tác giả: </span>
+                        <span class="ms-2">@ViewBag.novel.Author</span>
+                    </div>
+                    <div class="FeedbackWrapper d-flex">
+                        <div class="py-1 px-2 View">
+                            <i class="fa-solid fa-eye" style="color: #0ea5e9;"></i> @ViewBag.SumView
+                        </div>
+                        <div class="py-1 px-2 Follow">
+                            <i class="fa-solid fa-heart" style="color: #f43f5e;"></i> @ViewBag.novel.FavoriteNovels.Count
+                        </div>
+                        <div class="py-1 px-2 Rating">
+                            <i class="fa-solid fa-star" style="color: #facc15;"></i> @ViewBag.AverageRating/5
+                        </div>
+                    </div>
+                    <div class="Description-Novel">
+                        @{
+                            if (ViewBag.novel.Description != null)
+                            {
+                                string bookDescription = ViewBag.novel.Description.ToString();
+                                // Xóa tất cả các thẻ HTML bằng cách sử dụng Regex
+                                string sanitizedDescription = System.Text.RegularExpressions.Regex.Replace(bookDescription, "<.*?>", "");
+
+                                <p>
+                                    @Html.Raw(sanitizedDescription)
+                                </p>
+                            }
+                        }
+
+                    </div>
+                    <div class="Action mt-4 d-flex flex-sm-row flex-column">
+                        <div class="Following me-2 mt-1">
+                            @{
+                                if (ViewBag.Following != null)
+                                {
+                                    <a id="UnfollowBtn" class="py-2 px-3 d-block" href="/AreaUser/AUManagerProfile/RemoveFavoriteNovel/@ViewBag.novel.NovelID"><i class="fa-solid fa-bookmark me-1"></i> Bỏ Theo Dõi</a>
+                                    <script>
+                                        var taga = document.getElementById('UnfollowBtn');
+                                        taga.addEventListener('click', function (event) {
+                                            event.preventDefault();
+                                            var url = taga.href;
+                                            Fetch(url);
+                                        });
+                                    </script>
+                                }
+                                else
+                                {
+                                    <a id="FollowBtn" class="py-2 px-3 d-block" href="/AreaUser/AUManagerProfile/AddFavoriteNovel/@ViewBag.novel.NovelID"><i class="fa-solid fa-bookmark me-1"></i> Theo Dõi Truyện</a>
+                                    <script>
+                                        var taga = document.getElementById('FollowBtn');
+                                        taga.addEventListener('click', function (event) {
+                                            event.preventDefault();
+                                            var url = taga.href;
+                                            Fetch(url);
+                                        });
+                                    </script>
+                                }
+                            }
+                        </div>
+                        @* js Follow *@
+                        <script>
+                            function Fetch(url) {
+                                fetch(url, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            location.reload();
+                                        }
+                                    })
+                                    .catch(error => {
+                                        document.getElementById('LoginBtn').click();
+                                    });
+                            }
+                        </script>
+                        <div class="Reading me-2 mt-1">
+                            @{
+                                if (ViewBag.FirstChapter == null)
+                                {
+
+                                }
+                                else
+                                {
+                                    <a class="py-2 px-3 d-block" href="~/Novel/ReadingNovel/@ViewBag.FirstChapter"><i class="fa-solid fa-book-open me-1"></i> Đọc Ngay</a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row ActionNovel my-5">
+                <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="infomation-tab" data-bs-toggle="tab" data-bs-target="#infomation-tab-pane" type="button"
+                                role="tab" aria-controls="infomation-tab-pane" aria-selected="true">
+                            <i class="fa-solid fa-circle-info"></i> Thông Tin Chi Tiết
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="Chapter-tab" data-bs-toggle="tab" data-bs-target="#Chapter-tab-pane" type="button"
+                                role="tab" aria-controls="Chapter-tab-pane" aria-selected="true">
+                            <i class="fa-solid fa-list"></i> Danh Sách Chương (@ViewBag.novel.Chapters.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="Comment-tab" data-bs-toggle="tab" data-bs-target="#Comment-tab-pane" type="button"
+                                role="tab" aria-controls="Comment-tab-pane" aria-selected="false" onclick="GetAllCommnetsNovel()">
+                            <i class="fa-solid fa-comments"></i> Bình Luận (@ViewBag.CountCmt)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="Rate-tab" data-bs-toggle="tab" data-bs-target="#Rate-tab-pane" type="button"
+                                role="tab" aria-controls="Rate-tab-pane" aria-selected="false" onclick="RenderReviewsNovel()">
+                            <i class="fa-solid fa-star"></i> Đánh Giá (@ViewBag.novel.Reviews.Count)
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content " id="myTabContent">
+                    <div class="tab-pane fade show active" id="infomation-tab-pane" role="tabpanel" aria-labelledby="infomation-tab" tabindex="0">
+                        <div class="container-fluid">
+                            <div class="row flex-column-reverse flex-md-row">
+                                <div class="col-12 col-md-8 my-auto Description-Novel">
+                                    <h6 class="mt-3">Thể Loại</h6>
+                                    <ul class="nav">
+                                        @foreach (var c in @ViewBag.novel.NovelCategories)
+                                        {
+                                            <li class="nav-item">
+                                                <a href="~/Novel/FindByCategory?categoryID=@c.CategoryID" class="nav-link">@c.Category.CategoryName</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                    <h6 class="mt-3">Giới thiệu</h6>
+                                    <div class="Introduction lh-lg">
+                                        @Html.Raw(ViewBag.novel.Description)
+                                    </div>
+
+                                </div>
+                                <div class="col-9 col-sm-8 col-md-4 mx-auto">
+                                    <div class="UserProfile p-4 rounded-start rounded-end">
+                                        <div class="Avatar w-75 position-relative mx-auto">
+                                            <img class="w-100 h-100 position-absolute rounded-pill" src="~/Contents/img/Avatar/@ViewBag.novel.User.Avatar" alt="Avatar">
+                                        </div>
+                                        <div class="Information">
+                                            <h4 class="UserName text-center my-2">
+                                                @ViewBag.author.Username
+                                            </h4>
+                                            <div class="Action">
+                                                <ul class="nav align-items-center flex-column flex-md-row justify-content-xl-center">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link disabled">
+                                                            <i class="fa-solid fa-swatchbook"></i>
+                                                            <span>Truyện Đã Đăng: @ViewBag.author.Novels.Count</span>
+                                                        </a>
+                                                    </li>
+                                                    @*<li class="nav-item">
+                                                            <a class="nav-link disabled">
+                                                                <span><i class="fa-solid fa-heart"></i> Lượt Theo Dõi: 999</span>
+                                                            </a>
+                                                        </li>*@
+                                                    @*<li class="nav-item">
+                                                            <a class="nav-link" href="#">
+                                                                <i class="fa-regular fa-heart"></i>
+                                                                <span>Theo Dõi</span>
+                                                            </a>
+                                                        </li>*@
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" href="~/User/ViewUserProfile/@ViewBag.author.UserID">
+                                                            <i class="fa-solid fa-up-right-from-square"></i>
+                                                            <span>Truy Cập Trang Cá Nhân</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="Chapter-tab-pane" role="tabpanel" aria-labelledby="Chapter-tab" tabindex="0">
+                        <div id="wrapperPages">
+                            <div class="data-container"></div>
+                            <div id="pagination-ForChapters" class="my-5"></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="Comment-tab-pane" role="tabpanel" aria-labelledby="Comment-tab" tabindex="0">
+                        <div class="container">
+                            <div class="Comment-List">
+                                <ul class="list-group list-group-flush" id="commentList">
+                                </ul>
+                                <div id="loadingSpinner" class="d-flex justify-content-center d-none">
+                                    <div class="spinner-border text-primary mx-auto" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <input type="button" value="Xem thêm" id="loadMoreBtn" class="w-100 mt-4">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="Rate-tab-pane" role="tabpanel" aria-labelledby="Rate-tab" tabindex="0">
+
+                        <div class="container">
+                            <div class="rating-container">
+                                <div class="stars">
+                                    <span class="star" data-rating="1">&#9733;</span>
+                                    <span class="star" data-rating="2">&#9733;</span>
+                                    <span class="star" data-rating="3">&#9733;</span>
+                                    <span class="star" data-rating="4">&#9733;</span>
+                                    <span class="star" data-rating="5">&#9733;</span>
+                                </div>
+                                <div class="rating-description ms-3"></div>
+                                <div class="rating-text">Hãy đánh giá truyện của chúng tôi:</div>
+                                <div id="FormForRate">
+
+                                </div>
+                                <div class="RateList">
+                                    <div id="Rated">
+
+                                    </div>
+                                    <ul class="list-group list-group-flush" id="rateList">
+                                    </ul>
+                                    <div id="rateLoadingSpinner" class="d-flex justify-content-center d-none">
+                                        <div class="spinner-border text-primary mx-auto" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                    <input type="button" value="Xem thêm" id="loadMoreRateBtn" class="w-100 mt-4">
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            const starDescriptions = {
+                                1: "Quá tệ",
+                                2: "Không hay lắm",
+                                3: "Cũng được",
+                                4: "Khá hay",
+                                5: "Rất hay",
+                            };
+
+                            const stars = document.querySelectorAll("span[data-rating]");
+                            const ratingDescription = document.querySelector(".rating-description");
+                            const starsContainer = document.querySelector(".stars");
+
+                            starsContainer.addEventListener("mouseover", () => {
+                                starsContainer.classList.add("hovered");
+                            });
+
+                            starsContainer.addEventListener("mouseout", () => {
+                                starsContainer.classList.remove("hovered");
+                            });
+                            stars.forEach((star, index) => {
+                                star.addEventListener("click", () => {
+                                    ratingDescription.innerText = "";
+                                    document.querySelector('input[name="Rating"]').value = index + 1;
+                                });
+
+                                star.addEventListener("click", (event) => {
+                                    const rating = event.target.getAttribute("data-rating");
+                                    ratingDescription.innerText = starDescriptions[rating];
+                                    stars.forEach((s, index) => {
+                                        if (index < rating) {
+                                            s.classList.add("active");
+                                        } else {
+                                            s.classList.remove("active");
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
+
+                        @{
+                            if (ViewBag.HasRate != null)
+                            {
+                                <script>
+                                    var rates = document.querySelectorAll('span[data-rating]');
+                                    var rating = document.querySelector('input[name="Rating"]').value;
+                                    rates.forEach(item => {
+                                        if (item.dataset.rating == rating) {
+                                            item.click();
+                                        }
+                                    });
+                                </script>
+                            }
+
+
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="container BookUpdate">
+        <!-- Truyện Mới Cập Nhật -->
+        <div class="d-flex">
+            <h3 class="my-4"> <i class="fa-regular fa-clock"></i> Truyện đề xuất</h3>
+        </div>
+        <div id="RecentlyUpdatedNovels" class="row">
+            @{
+                if (similarNovels != null)
+                {
+                    foreach (var item in similarNovels)
+                    {
+                        <div class="col-xl-2-4 col-6 col-sm-6 col-md-4 col-lg-3">
+                            <a href="/Novel/ViewNovel/@item.NovelID" class="d-block Card">
+                                <img src="/Areas/Author/Contents/img/Poster/@item.Poster" style="width:100%;">
+                                <div class="Overlay-Card"></div>
+                                <div class="Information">
+                                    <h6 class="Title"><span>@item.Title</span></h6>
+                                    <ul class="nav justify-content-between">
+                                        <li class="nav-item">
+                                            <i class="fa-solid fa-eye"></i>
+                                            <span>@item.Chapters.Sum(c => c.Views)</span>
+                                        </li>
+                                        <li class="nav-item">
+                                            <i class="fa-solid fa-heart"></i>
+                                            <span>@item.FavoriteNovels.Count(n => n.NovelID == item.NovelID)</span>
+                                        </li>
+                                        <li class="nav-item">
+                                            <i class="fa-solid fa-comment-dots"></i>
+                                            <span>@item.Chapters.SelectMany(c => c.Comments).Count()</span>
+                                        </li>
+                                    </ul>
+                                    <hr>
+                                    <div class="d-flex justify-content-between InfoChapter" style="font-size: 0.9rem;">
+                                        <span>Chương @item.Chapters.Count</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+</section>
+
+@section script {
+    <!-- Chapters -->
+    <script>
+    var url = '/Novel/RenderChapters/@ViewBag.novel.NovelID';
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            RenderChapters('ForChapters', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    // js danh sách chương
+    function RenderChapters(name, data) {
+        var container = $('#pagination-' + name);
+        if (!container.length) return;
+
+        var options = {
+            dataSource: data,
+            pageSize: 52,
+            showSizeChanger: false,
+            showGoInput: true,
+            showGoButton: true,
+            autoHidePrevious: true,
+            autoHideNext: true,
+            callback: function (response, pagination) {
+                var dataHtml = '<div class="row g-3">';
+                $.each(response, function (index, item) {
+                    dataHtml +=
+                        `
+                            <div class="col-6 col-sm-4 col-md-3">
+                                <a href="/Novel/ReadingNovel/${item.ChapterID}">
+                                    <div class="p-2 Box-Chapter-Link">
+                                        <span class="Chapter-Link">
+                                            ${item.ChapterTitle}
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+                        `;
+                });
+
+                dataHtml += '</div>';
+                container.prev().html(dataHtml);
+            }
+        };
+
+        //$.pagination(container, options);
+
+        container.addHook('beforeInit', function () {
+
+        });
+        container.pagination(options);
+
+        container.addHook('beforePageOnClick', function () {
+
+        });
+    }
+    </script>
+
+    <!-- js cmt -->
+    <script>
+        var formForRate = document.getElementById('FormForRate');
+        var pageComment = 1;
+        var commentsPerPage = 10;
+        var comments;
+
+        function GetAllCommnetsNovel() {
+            var url = '/AreaUser/AUComment/GetAllCommentsNovel/' + @ViewBag.novel.NovelID;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                comments = data;
+                document.getElementById('commentList').innerHTML = '';
+                pageComment = 1;
+                loadMoreComments(comments);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        $("#loadMoreBtn").on("click", function () {
+            loadMoreComments(comments);
+        });
+
+        function displayComments(comments) {
+            var commentList = document.getElementById('commentList');
+            var cmtElement = '';
+            comments.forEach(comment => {
+                if (comment.UserID == parseInt(dataForViewNovel.dataset.userid)) {
+                    cmtElement = `
+                        <li class="list-group-item ElementOfComments">
+                            <div class="Comment">
+                                <div class="Comment-Parent">
+                                    <div class="User mt-3 d-flex align-items-center">
+                                        <img class="Avatar rounded-circle" src="/Contents/img/Avatar/${comment.Avatar}" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover" />
+                                        <h5 class="mb-0 ms-2">${comment.Username}</h5>
+                                        <div class="ms-auto position-relative Tab-ActionComment" id="Tab-Action">
+                                            <input type="checkbox" hidden id="Cmt_ellipsis-vertical${comment.CommentID}" class="checkboxTabActionComment" />
+                                            <label for="Cmt_ellipsis-vertical${comment.CommentID}" style="cursor: pointer">
+                                                <i class="fa-solid fa-ellipsis-vertical p-2"></i>
+                                            </label>
+                                            <ul class="list-group position-absolute d-none flex-column align-items-start ActionListCmt" id="ActionListCmt${comment.CommentID}" style="width: 500%; border: solid 1px #333; background-color: #fff">
+                                                <li class="list-group-item p-0 w-100">
+                                                    <form class="d-flex flex-column FormHandleComment" data-request="/AreaUser/AUComment/DeleteComment" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="number" hidden value="${comment.CommentID}" name="id" />
+                                                        <input class="Item-Link p-2 d-block w-100 text-start border-0 rounded-start rounded-end" type="submit" value="Xóa" />
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <p class="Comment-content my-3">${comment.CommentText}</p>
+                                    <div class="Action d-flex">
+                                        <ul class="nav">
+                                            <li class="nav-item">
+                                                <small><a href="/Novel/ReadingNovel/${comment.ChapterID}"><i class="fa-solid fa-book"></i> Chương ${comment.ChapterNumber}</a></small>
+                                            </li>
+                                            <li class="nav-item ms-3">
+                                                <small><i class="fa-solid fa-clock"></i></small> <small data-last-update="${comment.CreatedAt}">${comment.CreatedAt}</small>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }
+                else
+                {
+                    cmtElement = `
+                        <li class="list-group-item">
+                            <div class="Comment">
+                                <div class="Comment-Parent">
+                                    <div class="User mt-3 d-flex align-items-center">
+                                        <img class="Avatar rounded-circle" src="/Contents/img/Avatar/${comment.Avatar}" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover" />
+                                        <h5 class="mb-0 ms-2">${comment.Username}</h5>
+                                    </div>
+                                    <p class="Comment-content my-3">${comment.CommentText}</p>
+                                    <div class="Action d-flex">
+                                        <ul class="nav">
+                                            <li class="nav-item">
+                                                <small><i class="fa-solid fa-book"></i> Chương ${comment.ChapterNumber}</small>
+                                            </li>
+                                            <li class="nav-item ms-3">
+                                                <small><i class="fa-solid fa-clock"></i></small> <small data-last-update="${comment.CreatedAt}">${comment.CreatedAt}</small>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }
+                commentList.insertAdjacentHTML('beforeend', cmtElement);
+            });
+            UpdateTimeSince();
+            JavascriptForMyComment();
+            StartCommentAPI();
+        }
+
+        function loadMoreComments(comments) {
+            $("#loadMoreBtn").hide(); // Ẩn nút tải thêm
+            // Hiển thị spinner trong 1 giây trước khi tải dữ liệu
+            $("#loadingSpinner").removeClass("d-none");
+            setTimeout(() => {
+                $("#loadingSpinner").addClass("d-none"); // Ẩn spinner sau 1 giây
+                $("#loadMoreBtn").show(); // Hiển thị lại nút tải thêm
+
+                // Sử dụng slice để lấy số bình luận cần hiển thị trong lần tải thêm
+                const startIndex = (pageComment - 1) * commentsPerPage;
+                const endIndex = startIndex + commentsPerPage;
+                const commentsToShow = comments.slice(startIndex, endIndex);
+
+                if (commentsToShow.length > 0) {
+                    pageComment++;
+                    displayComments(commentsToShow);
+                }
+
+                // Ẩn nút tải thêm và hiển thị thông báo khi hết bình luận
+                if (startIndex + commentsToShow.length >= comments.length) {
+                    $("#loadMoreBtn").hide();
+                    $("#commentList").append("<p class='text-muted'>Không còn bình luận nào khác</p>");
+                }
+            }, 500);
+        }
+
+        function JavascriptForMyComment() {
+            var tabsActionComment = document.querySelectorAll('.Tab-ActionComment');
+            tabsActionComment.forEach(item => {
+                var inputChkBox = item.querySelector('.checkboxTabActionComment');
+                var actionList = item.querySelector('.ActionListCmt');
+                var label = item.querySelector('label');
+
+                inputChkBox.addEventListener('change', function () {
+                    if (this.checked) {
+                        actionList.classList.remove('d-none');
+                    } else {
+                        actionList.classList.add('d-none');
+                    }
+                });
+
+                document.addEventListener('click', function (event) {
+                    if (!label.contains(event.target) && !inputChkBox.contains(event.target) && !actionList.contains(event.target)) {
+                        inputChkBox.checked = false;
+                        actionList.classList.add('d-none');
+                    }
+                });
+
+
+            });
+        }
+
+        function StartCommentAPI() {
+            var formsHandleComment = document.querySelectorAll('.FormHandleComment');
+            formsHandleComment.forEach(item => {
+                item.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    var url = item.dataset.request;
+                    var formData = new FormData(this);
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+
+                            if (data.success == true) {
+                                item.closest('.ElementOfComments').remove();
+                            }
+                            else {
+                                alert("Không thành công")
+                            }
+                        })
+                        .catch((error) => {
+                            alert("Xảy ra lỗi");
+                        });
+                })
+            });
+        }
+    </script>
+
+    <!-- js rate -->
+    <script>
+
+        var PageRate = 1;
+        var RatesPerPageRate = 10;
+        var Rates;
+        var dataForViewNovel = document.getElementById('DataForViewNovel');
+
+        function RenderReviewsNovel() {
+            var url = '/AreaUser/AUReviewNovel/RenderReviewsNovel/' + @ViewBag.novel.NovelID;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                Rates = data;
+                FormHanldeRate(Rates)
+                document.getElementById('rateList').innerHTML = '';
+                PageRate = 1;
+                loadMoreRates(Rates)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        $("#loadMoreRateBtn").on("click", function () {
+            loadMoreRates(Rates)
+        });
+
+        function DisplayRates(Rates) {
+            var rateList = document.getElementById('rateList');
+            Rates.forEach((rate) => {
+                var rateElement = `
+                    <li class="list-group-item bg-transparent">
+                        <div class="Rate">
+                            <div class="User mt-3 d-flex align-items-center">
+                                <img class="Avatar rounded-circle"
+                                     src="/Contents/img/Avatar/${rate.Avatar}" alt="Avatar"
+                                     style="width: 40px; height: 40px; object-fit: cover" />
+                                <h5 class="mb-0 ms-2">${rate.Username}</h5>
+                                <div class="ms-3 starss">
+                                    <span class="star ${(rate.Rating >= 1) ? " active" : ""}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 2) ? " active" : ""}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 3) ? " active" : ""}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 4) ? " active" : ""}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 5) ? " active" : ""}">&#9733;</span>
+                                </div>
+                                <div class="ms-auto"><small><i class="fa-regular fa-clock"></i></small> <small data-last-update="${rate.CreatedAt}">${rate.CreatedAt}</small></div>
+                            </div>
+                            <p class="Rate-content my-3 text-start">${rate.ReviewText}</p>
+                        </div>
+                    </li>
+                `;
+                rateList.insertAdjacentHTML('beforeend', rateElement);
+                UpdateTimeSince();
+            });
+        }
+
+        function FormHanldeRate(Rates) {
+            var formForRate = document.getElementById('FormForRate');
+            var rated = document.getElementById('Rated');
+            var formForRateHtml = `
+                        <form data-request="/AreaUser/AUReviewNovel/CreateNewReview" method="post" class="d-flex flex-column mt-3 FormHandleRate">
+                            @Html.AntiForgeryToken()
+                            <input type="number" hidden value="@ViewBag.novel.NovelID" name="NovelID" />
+                            <input type="number" hidden value="5" name="Rating" />
+                            <textarea class="form-control" id="Rate" rows="4" placeholder="Nhập đánh giá của bạn" name="ReviewText"></textarea>
+                            <button type="submit" class="btn btn-primary my-2 align-self-end">Đánh Giá</button>
+                        </form>
+            `;
+            var ratedHtml = '';
+            Rates.forEach((rate) => {
+                if (rate.UserID == parseInt(dataForViewNovel.dataset.userid)) {
+                    formForRateHtml = `
+                                        <form data-request="/AreaUser/AUReviewNovel/EditReviewed" method="post" class="d-flex flex-column mt-3 FormHandleRate">
+                                            @Html.AntiForgeryToken()
+                                            <input type="number" value="${rate.NovelID}" hidden name="NovelID" />
+                                            <input type="number" value="${rate.Rating}" hidden name="Rating" />
+                                            <textarea class="form-control" rows="4" placeholder="Nhập đánh giá của bạn" name="ReviewText">${rate.ReviewText}</textarea>
+                                            <button type="submit" class="btn btn-primary my-2 align-self-end">Cập Nhật</button>
+                                        </form>
+                    `;
+                    const createdAt = new Date(rate.CreatedAt);
+                    const formattedCreatedAt = createdAt.toISOString().slice(0, 10); // YYYY-MM-DD
+                    ratedHtml = `
+                        <div class="Rate">
+                            <div class="User mt-3 d-flex align-items-center">
+                                <img class="Avatar rounded-circle"
+                                     src="/Contents/img/Avatar/${rate.Avatar}" alt="Avatar"
+                                     style="width: 40px; height: 40px; object-fit: cover" />
+                                <h5 class="mb-0 ms-2">${rate.Username}</h5>
+                                <div class="ms-3 starss">
+                                    <span class="star ${(rate.Rating >= 1) ? 'active' : ''}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 2) ? 'active' : ''}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 3) ? 'active' : ''}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 4) ? 'active' : ''}">&#9733;</span>
+                                    <span class="star ${(rate.Rating >= 5) ? 'active' : ''}">&#9733;</span>
+                                </div>
+                                <div class="ms-2"><small><i class="fa-regular fa-clock"></i></small> <small data-last-update2="${rate.CreatedAt}">${formattedCreatedAt}</small></div>
+                                <form data-request="/AreaUser/AUReviewNovel/DeleteReview?NovelID=${rate.NovelID}" method="post" class="FormHandleRate ms-auto">
+                                    @Html.AntiForgeryToken()
+                                    <input type="submit" class="px-3 py-1 text-center rounded-start rounded-end" value="Xóa" />
+                                </form>
+                             </div>
+                            <p class="Rate-content my-3 text-start">${rate.ReviewText}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            formForRate.innerHTML = formForRateHtml;
+            rated.innerHTML = ratedHtml;
+            StartRateAPI();
+        }
+
+        function StartRateAPI() {
+            var formsHandleRate = document.querySelectorAll('.FormHandleRate');
+            formsHandleRate.forEach(item => {
+                item.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    var url = item.dataset.request;
+                    var formData = new FormData(this);
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('Rate-tab').click();
+                        })
+                        .catch((error) => {
+                            alert("Error");
+                        });
+                })
+            });
+        }
+
+        function loadMoreRates(Rates) {
+            $("#loadMoreRateBtn").hide(); // Ẩn nút tải thêm
+            // Hiển thị spinner trong 1 giây trước khi tải dữ liệu
+            $("#rateLoadingSpinner").removeClass("d-none");
+            setTimeout(() => {
+                $("#rateLoadingSpinner").addClass("d-none"); // Ẩn spinner sau 1 giây
+                $("#loadMoreRateBtn").show(); // Hiển thị lại nút tải thêm
+
+                // Sử dụng slice để lấy số đánh giá cần hiển thị trong lần tải thêm
+                var startIndex = (PageRate - 1) * RatesPerPageRate;
+                var endIndex = startIndex + RatesPerPageRate;
+                var RatesToShow = Rates.slice(startIndex, endIndex);
+
+                if (RatesToShow.length > 0) {
+                    DisplayRates(RatesToShow);
+                    PageRate++; // Tăng số trang lên để chuẩn bị cho lần tải thêm tiếp theo
+                }
+
+                // Ẩn nút tải thêm và hiển thị thông báo khi hết đánh giá
+                if (startIndex + RatesToShow.length >= Rates.length) {
+                    $("#loadMoreRateBtn").hide();
+                    $("#rateList").append("<p class='text-muted'>Không còn đánh giá nào khác</p>");
+                    //document.getElementById('EndRateList').innerHTML = "Không còn đánh giá nào khác";
+                }
+            }, 500);
+        }
+
+    </script>
+
+    <!-- Date format -->
+    <script>
+        // Format TimeSince
+        function getTimeSince(dateTime) {
+            var now = new Date();
+            var timeDiff = now - dateTime;
+
+            // Chuyển đổi thời gian từ milliseconds sang giờ, phút, giây
+            var seconds = Math.floor(timeDiff / 1000);
+            var minutes = Math.floor(seconds / 60);
+            var hours = Math.floor(minutes / 60);
+            var days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                return days + " ngày trước";
+            } else if (hours > 0) {
+                return hours + " giờ trước";
+            } else if (minutes > 0) {
+                return minutes + " phút trước";
+            } else {
+                return "Vừa mới đăng";
+            }
+        }
+
+        // update time
+        function UpdateTimeSince() {
+            var timeElements = document.querySelectorAll("[data-last-update]");
+            timeElements.forEach(function (element) {
+                var createdDateString = element.dataset.lastUpdate;
+                var createdDate = new Date(createdDateString);
+                element.innerText = getTimeSince(createdDate);
+            });
+        }
+    </script>
+}

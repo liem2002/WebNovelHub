@@ -1,0 +1,407 @@
+﻿
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <!-- css -->
+    <link rel="stylesheet" href="~/Contents/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/Contents/assets/font/fontawesome-free-6.4.0-web/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Slick Slider Syncing -->
+    <link rel="stylesheet" href="~/Contents/assets/css/slick.css">
+    <link rel="stylesheet" href="~/Contents/assets/css/slick-theme.css">
+    <link rel="stylesheet" href="~/Contents/assets/css/style.css">
+
+    <!-- end css -->
+    @RenderSection("css", false)
+
+</head>
+
+    <body>
+        <section id="Header">
+            <div class="container">
+                <div class="row my-2">
+                    <div class="col-4 d-flex">
+                        <a class="navbar-brand d-flex align-items-center Logo" href="~/Home/Index">
+                            @*<img class="" src="https://ncomics.vercel.app/_nuxt/logo.83be12af.svg" alt="NComics">*@
+                            <h3 class="">Truyen Full</h3>
+                        </a>
+                    </div>
+                    <div class="col-lg-4 d-flex order-1 order-lg-0">
+                        <form class="d-flex align-items-stretch rounded-pill m-2 w-100 custom-form bg-white" action="/Novel/Search" method="get">
+                            <input type="text" list="datalistOptions"
+                                   class="w-100 py-1 border-0 ps-3 rounded-pill flex-fill" placeholder="Search"
+                                   style="outline: none;" name="searchString" id="searchInput" value="@ViewData["SearchString"]">
+                            <button type="submit" class="px-3 border-0 rounded-pill bg-body">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                            <button onclick="startRecognition()" type="button" class="px-2 border-0 rounded-pill bg-body">
+                                <i class="bi bi-mic"></i>
+                            </button>
+                        </form>
+                        <script>
+                            function startRecognition() {
+                                var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                if (!SpeechRecognition) {
+                                    alert('Trình duyệt của bạn không hỗ trợ tính năng này.');
+                                    return;
+                                }
+
+                                var recognition = new SpeechRecognition();
+                                recognition.lang = 'vi-VN';
+
+                                recognition.onresult = function (event) {
+                                    var transcript = event.results[0][0].transcript.trim();
+                                    document.getElementById('searchInput').value = transcript;
+                                    search(transcript);
+                                };
+
+                                recognition.onerror = function (event) {
+                                    console.error(event.error);
+                                    alert('Đã xảy ra lỗi khi nhận diện giọng nói: ' + event.error);
+                                };
+
+                                recognition.start();
+                            }
+
+                            function search(searchString) {
+                                window.location.href = '/Novel/Search?searchString=' + encodeURIComponent(searchString);
+                            }
+                        </script>
+                    </div>
+                    <div class="col-8 col-lg-4 d-flex justify-content-end align-items-center">
+                        @{
+                            if (Session["User"] != null)
+                            {
+                                var user = (NovelHub.Models.User)HttpContext.Current.Session["User"];
+                                <a href="~/AreaUser/AUManagerProfile/UserProfile/@user.UserID" class="account">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span class="fw-bold">@user.Username</span>
+                                </a>
+                                <a href="~/Account/LogOut" class="account">
+                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal" class="account" id="LoginBtn">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span class="fw-bold">Tài khoản</span>
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <ul class="nav justify-content-center">
+                        <li class="nav-item">
+                            <a class="nav-link" id="GoToHome" aria-current="page" href="~/Home/Index">
+                                <i class="fa-solid fa-house"></i>
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown Category">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
+                               aria-expanded="false">
+                                <i class="bi bi-tags-fill"></i>
+                                Thể Loại
+                            </a>
+                            <ul class="dropdown-menu Dropdown-Menu text-center">
+                                <div class="container">
+                                    <div class="row gx-0" id="ListCategories">
+                                        <div class="col-6 col-sm-4">
+                                            <a href="#" class="Category-Link d-block w-100 h-100 py-2">Huyền Huyễn</a>
+                                        </div>
+                                        <div class="col-6 col-sm-4">
+                                            <a href="#" class="Category-Link d-block w-100 h-100 py-2">Tất cả</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a id="GoToFilterNovels" class="nav-link" href="~/Novel/FilterNovels">
+                                <i class="fa-solid fa-filter"></i>
+                                <span>Bộ Lọc</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        @RenderBody()
+
+    <section id="Footer" class="mt-5 bg-white">
+        <hr />
+        <div class="container py-3">
+
+            <div class="row">
+                <div class="col-5">
+                    <p>
+                        <strong>Truyện Full</strong> - Đọc truyện online, đọc truyện chữ, truyện hay. Website luôn cập nhật những bộ truyện mới thuộc các thể loại đặc sắc như truyện tiên hiệp, truyện kiếm hiệp, hay truyện ngôn tình một cách nhanh nhất. Hỗ trợ mọi thiết bị như di động và máy tính bảng.
+                    </p>
+                    <a href="#" class="d-block">
+                        <img src="https://i.creativecommons.org/l/by/4.0/88x31.png" width="100" height="50" class="object-fit-contain" />
+                    </a>
+                </div>
+                <div class="col-7">
+                    <div class="d-flex flex-wrap">
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Huyền Huyễn</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Tâm Lý</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Tiên Hiệp</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Ngôn Tình</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Lịch Sử</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Đồng Nhân</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Du Hí</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Quân Sự</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Khoa Học</a></div>
+                        <div class="m-2"><a href="#" class="btn btn-dark text-white">Kinh Dị</a></div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+        <section id="Modal">
+            <!-- Login/Register -->
+            <section>
+                <div class="modal fade" id="LoginModal" aria-hidden="true" aria-labelledby="LoginModalLabel" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="LoginModalLabel">Đăng Nhập</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="~/Account/Login" class="" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <div class="form-group mb-3">
+                                        <label class="col-md-12 my-1 control-label" for="EmailLogin">Email<span id="LoginErrorMessage" class="text-danger ms-3 float-end"></span></label>
+                                        <div class="col-md-12">
+                                            <input class="form-control" id="EmailLogin" type="email" name="InputEmail">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="col-md-12 my-1 control-label" for="PasswordLogin">Password<span id="LoginErrorMessage" class="text-danger ms-3 float-end"></span></label>
+                                        <div class="col-md-12">
+                                            <input class="form-control" id="PasswordLogin" type="password" name="inputPassword">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <div class="col-md-offset-2 col-md-12">
+                                            <div class="checkbox">
+                                                <input id="RememberMe" type="checkbox" value="1" name="RememberMe">
+                                                <label for="RememberMe" style="cursor: pointer;">Remember me?</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <span class="text-danger">@TempData["LoginErrorMessage"]</span>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <div class="col-md-offset-2 col-md-12">
+                                            <input type="submit" value="Đăng Nhập" class="btn btn-success">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <span>Bạn chưa có tài khoản?<a href="" data-bs-target="#RegisterModal" data-bs-toggle="modal" id="RegisterBtn"> Đăng ký tại đây</a></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="RegisterModal" aria-hidden="true" aria-labelledby="RegisterModalLabel" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="RegisterLabel">Đăng ký</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="~/Account/Register" class="" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <div class="form-group mb-3">
+                                        <label class="col-md-12 my-1 control-label" for="Username">Họ Tên<span id="RegisterErrorMessage" class="text-danger ms-3 float-end">@TempData["UsernameErrorMessage"]</span></label>
+                                        <div class="col-md-12">
+                                            <input class="form-control" id="Username" type="text" name="Username">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="col-md-12 my-1 control-label" for="Email">Email<span id="RegisterErrorMessage" class="text-danger ms-3 float-end">@TempData["EmailerrorMessage"]</span></label>
+                                        <div class="col-md-12">
+                                            <input class="form-control" id="Email" type="email" name="Email">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="col-md-12 my-1 control-label" for="Password">Mật khẩu<span id="RegisterErrorMessage" class="text-danger ms-3 float-end RegisterPassErrorMessage">@TempData["PasswordErrorMessage"]</span></label>
+                                        <div class="col-md-12">
+                                            <input class="form-control" id="Password" type="password" name="Password">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="col-md-12 my-1 control-label" for="Re-Password">Nhập lại mật khẩu<span id="RegisterErrorMessage" class="text-danger ms-3 float-end RegisterRePassErrorMessage"></span></label>
+                                        <div class="col-md-12">
+                                            <input class="form-control" id="Re-Password" type="password" name="rePass">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <div class="col-md-offset-2 col-md-12">
+                                            <input type="submit" value="Đăng ký" class="btn btn-success">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">Quay lại trang đăng nhập</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <button class="btn btn-primary" data-bs-target="#AccountModal" data-bs-toggle="modal">Open first modal</button> -->
+            </section>
+
+            <!-- Toast -->
+            <section>
+                <button type="button" class="btn btn-primary" hidden id="liveToastBtn">ShowMessage</button>
+
+                <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                    <div id="liveToast" class="toast bg-white" role="alert" aria-live="assertive" aria-atomic="true" style="border: solid 2px @TempData["Color"]">
+                        <div class="toast-header">
+                            <strong class="me-auto" style="color: @TempData["Color"]">Thông báo</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            @TempData["ToastContent"]
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+
+
+        <!-- js -->
+        <script src="~/Contents/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="~/Contents/assets/ckeditor/ckeditor.js"></script>
+        <script src="~/Contents/assets/js/jquery-3.6.0.min.js"></script>
+        <script src="~/Contents/assets/js/app.js"></script>
+        <script src="~/Contents/assets/js/pagination.js"></script>
+
+        @RenderSection("script", false)
+
+        <!-- js Toast-->
+        <script>
+            const toastTrigger = document.getElementById('liveToastBtn')
+            const toastLive = document.getElementById('liveToast')
+
+            if (toastTrigger) {
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLive)
+                toastTrigger.addEventListener('click', () => {
+                    toastBootstrap.show()
+                })
+            }
+        </script>
+
+        <!-- js login error -->
+        @if (TempData["loginError"] != null)
+        {
+            <script>
+                document.getElementById('LoginBtn').click();
+            </script>
+        }
+        <!-- js register error -->
+        @if (TempData["registerError"] != null)
+        {
+            <script>
+                document.querySelector('#RegisterBtn').click();
+            </script>
+        }
+
+        <!-- Active Toast-->
+        @if (TempData["ActiveToast"] != null)
+        {
+            <script>
+                document.getElementById("liveToastBtn").click();
+            </script>
+        }
+
+        <!-- js login form -->
+        <script>
+            var InputsLogin = document.querySelectorAll('#LoginModal .form-group');
+            InputsLogin.forEach(element => {
+                element.querySelector('input.form-control').addEventListener('blur', function () {
+                    if (!element.querySelector('input.form-control').value) {
+                        element.querySelector('#LoginErrorMessage').textContent = "Vui lòng nhập trường này";
+                    }
+                })
+                element.querySelector('input.form-control').addEventListener('input', function () {
+                    element.querySelector('#LoginErrorMessage').textContent = "";
+                })
+            })
+        </script>
+
+        <!-- js register form -->
+        <script>
+            var password = document.querySelector('#RegisterModal .form-group input#Password');
+            var rePassword = document.querySelector('#RegisterModal .form-group input#Re-Password');
+            var InputsRegister = document.querySelectorAll('#RegisterModal .form-group');
+            InputsRegister.forEach(element => {
+                element.querySelector('input.form-control').addEventListener('blur', function () {
+                    if (!element.querySelector('input.form-control').value) {
+                        element.querySelector('#RegisterErrorMessage').textContent = "Vui lòng nhập trường này";
+                    }
+                })
+                element.querySelector('input.form-control').addEventListener('input', function () {
+                    if (this == rePassword || this == password) {
+                        if (password.value != rePassword.value) {
+                            element.querySelector('#RegisterErrorMessage').textContent = "Mật khẩu xác nhận không chính xác";
+                        } else {
+                            document.querySelector('.form-group .RegisterPassErrorMessage').textContent = "";
+                            document.querySelector('.form-group .RegisterRePassErrorMessage').textContent = "";
+                        }
+                    } else {
+                        element.querySelector('#RegisterErrorMessage').textContent = "";
+                    }
+                })
+            })
+        </script>
+        @*Render category*@
+        <script>
+            var url = '/Category/RenderAllCategories';
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var html = '';
+                    data.forEach(element => {
+                        html += `
+                                <div class="col-6 col-sm-4"> <a href="/Novel/FindByCategory?categoryID=${element.CategoryID}" class="Category-Link d-block w-100 h-100 py-2">${element.CategoryName}</a> </div>
+                                `;
+                    });
+                    html += `<div class="col-6 col-sm-4"> <a href="/Novel/FilterNovels" class="Category-Link d-block w-100 h-100 py-2">Tất cả</a> </div>`
+                    // Đặt HTML vào ListCategories
+                    document.getElementById('ListCategories').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        </script>
+
+        
+    </body>
+
+</html>
